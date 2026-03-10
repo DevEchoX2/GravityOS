@@ -7,7 +7,7 @@ Welcome to GravityOS. By accessing or using our platform, you agree to be bound 
 By using GravityOS, you affirm that you are of legal age to form a binding contract or have obtained consent from a parent or guardian.
 
 # 2. Acceptable Use
-To keep GravityOS safe and functional for everyone, you agree not to:
+**To keep GravityOS safe and functional for everyone, you agree not to:**
 
 - Use the platform for any illegal activities.
 
@@ -41,4 +41,4 @@ If you have questions regarding these terms, please contact us at: [devechox@gma
 A Note on "Proxy" Sites
 Since GravityOS involves proxying content, you may want to add a specific clause regarding Copyright and DMCA:
 
-DMCA Compliance: GravityOS respects intellectual property rights. If you believe any content accessible through our platform infringes upon your copyright, please contact us immediately at [Insert Contact] so we can review and take appropriate action.
+DMCA Compliance: GravityOS respects intellectual property rights. If you believe any content accessible through our platform infringes upon your copyright, please contact us immediately at [devechox@gmail.com] so we can review and take appropriate action.
