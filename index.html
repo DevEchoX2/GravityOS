@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gravityOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.1.0/font/lucide.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --sidebar-width: 80px;
+            --sidebar-expanded-width: 260px;
+            --accent: #10b981;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            z-index: 100;
+            position: relative;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-expanded-width);
+        }
+
+        .sidebar-logo {
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .logo-text {
+            position: absolute;
+            left: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 900;
+            font-size: 24px;
+            letter-spacing: -1px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .sidebar:hover .logo-text {
+            opacity: 1;
+        }
+
+        .nav-items {
+            flex: 1;
+            width: 100%;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            overflow: hidden;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .nav-icon {
+            min-width: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-text {
+            margin-left: 20px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            width: 100%;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .webos-container {
+            position: absolute;
+            inset: 0;
+            display: none;
+            padding: 40px;
+        }
+
+        .window {
+            position: absolute;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            min-height: 200px;
+        }
+
+        .window-header {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: move;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .control.close { background: #ff5f56; }
+        .control.min { background: #ffbd2e; }
+        .control.max { background: #27c93f; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <div class="w-4 h-4 rounded-full bg-black"></div>
+            </div>
+            <span class="logo-text">gravity<span class="text-emerald-500">OS</span></span>
+        </div>
+
+        <nav class="nav-items">
+            <a href="#" class="nav-item active" data-page="home">
+                <i class="lucide-home nav-icon"></i>
+                <span class="nav-text">Home</span>
+            </a>
+            <a href="#" class="nav-item" data-page="proxy">
+                <i class="lucide-globe nav-icon"></i>
+                <span class="nav-text">Browser</span>
+            </a>
+            <a href="#" class="nav-item" data-page="games">
+                <i class="lucide-gamepad-2 nav-icon"></i>
+                <span class="nav-text">Games</span>
+            </a>
+            <a href="#" class="nav-item" data-page="apps">
+                <i class="lucide-layout-grid nav-icon"></i>
+                <span class="nav-text">Apps</span>
+            </a>
+            <a href="#" class="nav-item" data-page="ai">
+                <i class="lucide-sparkles nav-icon"></i>
+                <span class="nav-text">AI Assistant</span>
+            </a>
+            <div class="flex-1"></div>
+            <a href="#" class="nav-item" data-page="settings">
+                <i class="lucide-settings nav-icon"></i>
+                <span class="nav-text">Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="https://github.com" target="_blank" class="nav-item">
+                <i class="lucide-github nav-icon"></i>
+                <span class="nav-text">GitHub</span>
+            </a>
+            <a href="https://discord.com" target="_blank" class="nav-item">
+                <i class="lucide-message-circle nav-icon"></i>
+                <span class="nav-text">Discord</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <iframe id="content-frame" src="assets/home/index.html"></iframe>
+        
+        <div id="webos-mode" class="webos-container"></div>
+    </main>
+
+    <script>
+        const frame = document.getElementById('content-frame');
+        const navItems = document.querySelectorAll('.nav-item[data-page]');
+        const webosOverlay = document.getElementById('webos-mode');
+        let isWebOSMode = false;
+        let currentEngine = 'uv';
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = item.getAttribute('data-page');
+                
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                if (page === 'settings') {
+                    toggleWebOS();
+                    return;
+                }
+
+                switch(page) {
+                    case 'home': frame.src = 'assets/home/index.html'; break;
+                    case 'proxy': frame.src = 'assets/proxy/proxy.html'; break;
+                    case 'games': frame.src = 'assets/games/games.html'; break;
+                    case 'apps': frame.src = 'assets/home/index.html#apps'; break;
+                    case 'ai': frame.src = 'assets/ai/ai.html'; break;
+                }
+            });
+        });
+
+        function toggleWebOS() {
+            isWebOSMode = !isWebOSMode;
+            if (isWebOSMode) {
+                webosOverlay.style.display = 'block';
+                frame.style.display = 'none';
+                createWindow('System Settings', `
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-xs font-bold text-white/40 uppercase mb-4">Proxy Engine Switcher</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                ${['uv', 'scramjet', 'libcurl', 'epoxy', 'baremux'].map(engine => `
+                                    <button onclick="setEngine('${engine}')" class="engine-btn p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all text-left ${currentEngine === engine ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500' : ''}">
+                                        <span class="text-xs font-bold uppercase">${engine}</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="h-px bg-white/5"></div>
+                        <div>
+                            <h3 class="text-xs font-bold text-white/40 uppercase mb-4">System Info</h3>
+                            <p class="text-[10px] font-mono opacity-50">gravityOS v1.0.4-stable<br>Kernel: WebOS-2.5.1<br>Uptime: <span id="uptime">0s</span></p>
+                        </div>
+                    </div>
+                `);
+                startUptime();
+            } else {
+                webosOverlay.style.display = 'none';
+                frame.style.display = 'block';
+                webosOverlay.innerHTML = '';
+            }
+        }
+
+        window.setEngine = (engine) => {
+            currentEngine = engine;
+            document.querySelectorAll('.engine-btn').forEach(btn => {
+                btn.classList.remove('border-emerald-500', 'bg-emerald-500/10', 'text-emerald-500');
+                if (btn.innerText.toLowerCase() === engine) {
+                    btn.classList.add('border-emerald-500', 'bg-emerald-500/10', 'text-emerald-500');
+                }
+            });
+            if (frame.src.includes('proxy.html')) {
+                frame.contentWindow.postMessage({ type: 'SET_ENGINE', engine }, '*');
+            }
+        };
+
+        let uptimeInterval;
+        function startUptime() {
+            let s = 0;
+            clearInterval(uptimeInterval);
+            uptimeInterval = setInterval(() => {
+                s++;
+                const el = document.getElementById('uptime');
+                if (el) el.innerText = s + 's';
+            }, 1000);
+        }
+
+        function createWindow(title, content) {
+            const win = document.createElement('div');
+            win.className = 'window';
+            win.style.left = '100px';
+            win.style.top = '100px';
+            win.style.width = '450px';
+            win.style.height = 'auto';
+
+            win.innerHTML = `
+                <div class="window-header">
+                    <span class="text-xs font-bold uppercase tracking-widest text-white/40">${title}</span>
+                    <div class="window-controls">
+                        <div class="control min"></div>
+                        <div class="control max"></div>
+                        <div class="control close"></div>
+                    </div>
+                </div>
+                <div class="flex-1 p-8">
+                    ${content}
+                </div>
+            `;
+
+            webosOverlay.appendChild(win);
+            makeDraggable(win);
+            win.querySelector('.close').onclick = () => win.remove();
+        }
+
+        function makeDraggable(el) {
+            const header = el.querySelector('.window-header');
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            header.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                el.style.zIndex = '1000';
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'NAVIGATE') {
+                const item = document.querySelector(`.nav-item[data-page="${event.data.page}"]`);
+                if (item) item.click();
+                if (event.data.page === 'proxy') {
+                    setTimeout(() => {
+                        frame.contentWindow.postMessage(event.data, '*');
+                    }, 100);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
