@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home | gravityOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.1.0/font/lucide.css">
+</head>
+<body class="bg-transparent text-white overflow-x-hidden">
+    <div class="min-h-screen p-12 flex flex-col items-center justify-center space-y-16">
+        <div class="text-center space-y-6">
+            <div id="clock" class="text-6xl font-black tracking-tighter opacity-20 mb-4">00:00:00</div>
+            <h1 class="text-9xl font-black tracking-tighter uppercase leading-none">
+                Gravity<span class="text-emerald-500">OS</span>
+            </h1>
+            <p id="greeting" class="text-white/40 text-2xl font-light tracking-widest uppercase">
+                The Next Generation Web Environment
+            </p>
+        </div>
+
+        <div class="w-full max-w-3xl relative group">
+            <div class="absolute inset-y-0 left-8 flex items-center pointer-events-none text-white/20 group-focus-within:text-emerald-500 transition-colors">
+                <i class="lucide-search text-3xl"></i>
+            </div>
+            <input type="text" id="search-input" placeholder="Search the web or enter URL..." 
+                class="w-full bg-white/5 border border-white/10 rounded-[3rem] py-10 pl-20 pr-10 text-3xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all shadow-2xl placeholder:text-white/10 backdrop-blur-xl">
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-5xl">
+            <div class="shortcut-card" onclick="window.parent.postMessage({type: 'NAVIGATE', page: 'proxy', url: 'https://discord.com'}, '*')">
+                <div class="shortcut-icon bg-indigo-500/20 text-indigo-400">
+                    <i class="lucide-message-square"></i>
+                </div>
+                <span class="shortcut-label">Discord</span>
+            </div>
+            <div class="shortcut-card" onclick="window.parent.postMessage({type: 'NAVIGATE', page: 'proxy', url: 'https://instagram.com'}, '*')">
+                <div class="shortcut-icon bg-pink-500/20 text-pink-400">
+                    <i class="lucide-instagram"></i>
+                </div>
+                <span class="shortcut-label">Instagram</span>
+            </div>
+            <div class="shortcut-card" onclick="window.parent.postMessage({type: 'NAVIGATE', page: 'proxy', url: 'https://youtube.com'}, '*')">
+                <div class="shortcut-icon bg-red-500/20 text-red-400">
+                    <i class="lucide-youtube"></i>
+                </div>
+                <span class="shortcut-label">YouTube</span>
+            </div>
+            <div class="shortcut-card" onclick="window.parent.postMessage({type: 'NAVIGATE', page: 'proxy', url: 'https://github.com'}, '*')">
+                <div class="shortcut-icon bg-white/10 text-white">
+                    <i class="lucide-github"></i>
+                </div>
+                <span class="shortcut-label">GitHub</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
