@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browser | gravityOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="proxy.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.1.0/font/lucide.css">
+</head>
+<body class="bg-transparent text-white h-screen flex flex-col">
+    <header class="h-20 bg-white/5 backdrop-blur-2xl border-b border-white/10 flex items-center px-8 gap-8 z-50">
+        <div class="flex items-center gap-3">
+            <button class="nav-btn"><i class="lucide-arrow-left"></i></button>
+            <button class="nav-btn"><i class="lucide-arrow-right"></i></button>
+            <button class="nav-btn"><i class="lucide-rotate-ccw"></i></button>
+        </div>
+
+        <div class="flex-1 relative group">
+            <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-white/20 group-focus-within:text-emerald-500 transition-colors">
+                <i class="lucide-lock text-sm"></i>
+            </div>
+            <input type="text" id="url-input" placeholder="Enter URL or search..." 
+                class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-6 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all">
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="flex bg-white/5 rounded-xl p-1">
+                <button class="engine-tab active" data-engine="uv">UV</button>
+                <button class="engine-tab" data-engine="scramjet">SJ</button>
+                <button class="engine-tab" data-engine="libcurl">LC</button>
+                <button class="engine-tab" data-engine="epoxy">EP</button>
+                <button class="engine-tab" data-engine="baremux">BM</button>
+            </div>
+            <button class="nav-btn" id="menu-btn"><i class="lucide-more-vertical"></i></button>
+        </div>
+    </header>
+
+    <div class="h-12 bg-black/20 flex items-center px-4 gap-2 border-b border-white/5 overflow-x-auto no-scrollbar">
+        <div class="tab active">
+            <i class="lucide-globe text-xs mr-2"></i>
+            <span class="text-xs font-medium truncate max-w-[120px]">New Tab</span>
+            <i class="lucide-x text-[10px] ml-2 hover:text-red-400 cursor-pointer"></i>
+        </div>
+        <button class="p-2 hover:bg-white/5 rounded-lg text-white/40"><i class="lucide-plus text-sm"></i></button>
+    </div>
+
+    <div class="flex-1 bg-white relative">
+        <div id="loader" class="absolute inset-0 bg-[#050505] flex flex-col items-center justify-center space-y-4 z-40">
+            <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-white/40 font-medium tracking-widest uppercase text-xs">Initializing Engine...</p>
+        </div>
+        <iframe id="proxy-iframe" src="about:blank" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <div id="browser-menu" class="absolute top-24 right-8 w-64 bg-[#111] border border-white/10 rounded-2xl shadow-2xl p-4 hidden z-[100] backdrop-blur-3xl">
+        <div class="space-y-2">
+            <div class="menu-item">
+                <i class="lucide-puzzle text-emerald-400"></i>
+                <span>Extensions</span>
+            </div>
+            <div class="menu-item">
+                <i class="lucide-terminal text-cyan-400"></i>
+                <span>Run .EXE (WASM)</span>
+            </div>
+            <div class="h-px bg-white/5 my-2"></div>
+            <div class="menu-item">
+                <i class="lucide-history"></i>
+                <span>History</span>
+            </div>
+            <div class="menu-item">
+                <i class="lucide-download"></i>
+                <span>Downloads</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="proxy.js"></script>
+</body>
+</html>
