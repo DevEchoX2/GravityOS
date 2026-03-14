@@ -1,0 +1,46 @@
+.shortcut-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 32px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.shortcut-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-10px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.shortcut-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    transition: transform 0.3s;
+}
+
+.shortcut-card:hover .shortcut-icon {
+    transform: scale(1.1);
+}
+
+.shortcut-label {
+    font-weight: 600;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.3s;
+}
+
+.shortcut-card:hover .shortcut-label {
+    color: white;
+}
