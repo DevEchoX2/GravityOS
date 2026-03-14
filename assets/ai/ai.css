@@ -1,0 +1,26 @@
+.ai-message {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 20px;
+    border-radius: 20px 20px 20px 4px;
+    max-width: 80%;
+    align-self: flex-start;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.user-message {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 20px 20px 4px 20px;
+    max-width: 80%;
+    align-self: flex-end;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-left: auto;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
