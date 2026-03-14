@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Games | gravityOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="games.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.1.0/font/lucide.css">
+</head>
+<body class="bg-transparent text-white p-12">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <header class="flex items-center justify-between">
+            <div>
+                <h1 class="text-5xl font-black uppercase tracking-tight">Game <span class="text-emerald-500">Zone</span></h1>
+                <p class="text-white/40 mt-2">Unblocked and ready to play.</p>
+            </div>
+            <div class="relative">
+                <i class="lucide-search absolute left-4 top-1/2 -translate-y-1/2 text-white/20"></i>
+                <input type="text" id="game-search" placeholder="Search games..." 
+                    class="bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-6 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all">
+            </div>
+        </header>
+
+        <div id="games-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <!-- Games will be loaded here -->
+        </div>
+    </div>
+
+    <script src="games.js"></script>
+</body>
+</html>
