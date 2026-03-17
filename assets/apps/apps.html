@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apps - gravityOS</title>
+    <style>
+        :root {
+            --bg-color: transparent;
+            --text-color: white;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-color: #3b82f6;
+        }
+        body {
+            padding: 40px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+            transition: color 0.3s;
+        }
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 40px;
+            margin-top: 30px;
+        }
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .app-item:hover {
+            transform: translateY(-8px);
+        }
+        .app-icon {
+            width: 90px;
+            height: 90px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .app-item:hover .app-icon {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+        }
+        .app-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--text-color);
+            stroke-width: 1.5;
+            transition: stroke 0.3s;
+        }
+        .app-item:hover .app-icon svg {
+            stroke: var(--accent-color);
+        }
+        .app-name {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Apps</h1>
+    <div class="apps-grid">
+        <div class="app-item" onclick="launch('https://discord.com')">
+            <div class="app-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8Z"/><path d="M10 12h.01"/><path d="M13 12h.01"/><path d="M7 12h.01"/></svg>
+            </div>
+            <div class="app-name">Discord</div>
+        </div>
+        <div class="app-item" onclick="launch('https://youtube.com')">
+            <div class="app-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.42a2.78 2.78 0 0 0-1.94 2C1 8.14 1 12 1 12s0 3.86.42 5.58a2.78 2.78 0 0 0 1.94 2c1.71.42 8.6.42 8.6.42s6.88 0 8.6-.42a2.78 2.78 0 0 0 1.94-2C23 15.86 23 12 23 12s0-3.86-.42-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+            </div>
+            <div class="app-name">YouTube</div>
+        </div>
+        <div class="app-item" onclick="launch('https://instagram.com')">
+            <div class="app-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </div>
+            <div class="app-name">Instagram</div>
+        </div>
+        <div class="app-item" onclick="launch('https://github.com')">
+            <div class="app-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            </div>
+            <div class="app-name">GitHub</div>
+        </div>
+        <div class="app-item" onclick="launch('https://twitter.com')">
+            <div class="app-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+            </div>
+            <div class="app-name">Twitter</div>
+        </div>
+        <div class="app-item" onclick="launch('https://spotify.com')">
+            <div class="app-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5-2 4-2 4 2 4 2"/><path d="M9 17s1-1.5 3-1.5 3 1.5 3 1.5"/><path d="M7 11s2-3 5-3 5 3 5 3"/></svg>
+            </div>
+            <div class="app-name">Spotify</div>
+        </div>
+        <div class="app-item" onclick="launchApp('executor')">
+            <div class="app-icon" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+            </div>
+            <div class="app-name">Executor</div>
+        </div>
+    </div>
+
+    <script>
+        function launch(url) {
+            window.parent.loadProxy(url);
+        }
+
+        function launchApp(page) {
+            window.parent.loadPage(page);
+        }
+
+        window.addEventListener('message', (event) => {
+            // Apps page logic
+        });
+    </script>
+</body>
+</html>
