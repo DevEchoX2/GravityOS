@@ -20,7 +20,7 @@ fetch(POP_URL)
   .catch(() => console.warn("Could not load popularity stats."));
 
 
-fetch("../json/zones.json?v=" + Date.now())
+fetch("/assets/json/zones.json?v=" + Date.now())
   .then((r) => {
     if (!r.ok) throw new Error(`HTTP ${r.status} - ${r.statusText}`);
     const contentType = r.headers.get("content-type");
