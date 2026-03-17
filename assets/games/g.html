@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games - gravityOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="g.css">
+</head>
+<body>
+    <div class="header-area">
+        <h1>Games</h1>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search games...">
+        </div>
+    </div>
+    <div class="games-grid" id="games-grid">
+       <p class="loading">Loading files...</p>
+    </div>
+
+    <div id="gameContainer" style="position: fixed; inset: 0; background: rgba(10, 10, 10, 0.95); display: none; flex-direction: column; z-index: 999; backdrop-filter: blur(20px);">
+        <div id="gameHeader" style="height: 60px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; color: #fff;">
+            <button class="back-btn" onclick="closeGame()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; opacity: 0.7; transition: opacity 0.2s;">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <span id="game-title" style="font-weight: 600; letter-spacing: -0.01em;">Game</span>
+            <div style="display: flex; gap: 15px;">
+                <button onclick="toggleFullscreen()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1.1rem; opacity: 0.7;">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button onclick="closeGame()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; opacity: 0.7;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="gameContent" style="flex: 1; position: relative;"></div>
+    </div>
+
+    <script src="g.js"></script>
+</body>
+</html>
