@@ -72,6 +72,16 @@ self.addEventListener('fetch', (event) => {
       return response || fetch(event.request).then((fetchResponse) => {
         return caches.open(CACHE_NAME).then((cache) => {
           if (event.request.method === 'GET' && fetchResponse.status === 200) {
+            const contentType = fetchResponse.headers.get('content-type');
+            const isHtml = contentType && contentType.includes('text/html');
+            const url = event.request.url.split('?')[0];
+            const isStaticAsset = url.endsWith('.json') || url.endsWith('.js') || url.endsWith('.css');
+            
+            // Don't cache HTML fallbacks for static assets
+            if (isStaticAsset && isHtml) {
+              return fetchResponse;
+            }
+
             cache.put(event.request, fetchResponse.clone());
           }
           return fetchResponse;
