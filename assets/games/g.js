@@ -23,7 +23,7 @@ fetch(POP_URL)
   .catch(() => console.warn("Popularity stats unavailable"));
 
 // 2. Fetch Games Database
-fetch("/assets/json/zones.json?v=" + Date.now())
+fetch("/assets/games/zones.json?v=" + Date.now())
   .then(r => r.json())
   .then(data => {
     allGames = data.map(g => ({
