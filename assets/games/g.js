@@ -112,7 +112,11 @@ async function openGame(game) {
   gameContent.appendChild(iframe);
 
   try {
-    let html = await fetch(game.url + "?t=" + Date.now()).then(r => r.text());
+    let response = await fetch(game.url + "?t=" + Date.now());
+    if (!response.ok) {
+      throw new Error(`Game file not found (HTTP ${response.status})`);
+    }
+    let html = await response.text();
     const base = game.url.substring(0, game.url.lastIndexOf("/") + 1);
     if (!html.match(/<base/i)) {
       html = html.replace("<head>", `<head><base href="${base}">`);
@@ -122,7 +126,11 @@ async function openGame(game) {
     iframe.contentWindow.document.write(html);
     iframe.contentWindow.document.close();
   } catch (err) {
-    gameContent.innerHTML = `<p class="error" style="color: white; padding: 40px;">Failed to load game content: ${err.message}</p>`;
+    gameContent.innerHTML = `<div class="error" style="color: white; padding: 40px; text-align: center;">
+      <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
+      <p>Failed to load game content: ${err.message}</p>
+      <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">This usually means the file is missing from the repository.</p>
+    </div>`;
   }
 }
 
