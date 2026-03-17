@@ -288,6 +288,17 @@
         const savedCloak = localStorage.getItem('gravity_cloak');
         if (savedCloak) cloak(savedCloak);
 
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
         function loadPage(page) {
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
