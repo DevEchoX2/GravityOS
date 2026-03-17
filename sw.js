@@ -1,14 +1,14 @@
-const CACHE_NAME = 'gravity-os-v3';
-const GAME_CACHE_NAME = 'gravity-games-v3';
+const CACHE_NAME = 'gravity-os-v4';
+const GAME_CACHE_NAME = 'gravity-games-v4';
 
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/assets/home/index.html',
-  '/assets/games/games.html',
-  '/assets/games/games.js',
-  '/assets/games/games.css',
-  '/assets/json/zones.json',
+  '/assets/games/g.html',
+  '/assets/games/g.js',
+  '/assets/games/g.css',
+  '/assets/games/zones.json',
   '/assets/themes/themes.json',
   '/assets/proxy/proxy.html',
   '/assets/proxy/proxy.js',
@@ -79,7 +79,7 @@ self.addEventListener('fetch', (event) => {
             const url = event.request.url.split('?')[0];
             const isStaticAsset = url.endsWith('.json') || url.endsWith('.js') || url.endsWith('.css');
             
-            // Don't cache HTML fallbacks for static assets
+           
             if (isStaticAsset && isHtml) {
               return fetchResponse;
             }
