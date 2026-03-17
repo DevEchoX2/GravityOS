@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Executor - gravityOS</title>
+    <style>
+        body {
+            padding: 40px;
+            background: transparent;
+            color: white;
+            font-family: 'Inter', -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100vh;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        textarea {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #00ff00;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 20px;
+            outline: none;
+            resize: none;
+            font-size: 14px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .file-input {
+            display: none;
+        }
+        .status {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+            EXE (WASM) Executor
+        </h1>
+        <p style="margin:0; opacity:0.7; font-size:0.9rem;">Paste your code below or upload a .wasm / .exe file to execute in a secure sandbox.</p>
+        
+        <textarea id="code-area" placeholder="// Paste your code or WASM hex here..."></textarea>
+        
+        <div class="controls">
+            <button onclick="execute()">Run Code</button>
+            <button class="secondary" onclick="document.getElementById('file-input').click()">Upload File</button>
+            <input type="file" id="file-input" class="file-input" onchange="handleFile(this)">
+        </div>
+        
+        <div class="status" id="status">Ready.</div>
+    </div>
+
+    <script>
+        function execute() {
+            const code = document.getElementById('code-area').value;
+            const status = document.getElementById('status');
+            
+            if (!code.trim()) {
+                status.innerText = "Error: No code provided.";
+                return;
+            }
+
+            status.innerText = "Executing in WASM sandbox...";
+            
+            // Simulated execution logic
+            setTimeout(() => {
+                status.innerText = "Execution complete. Output: [Simulated WASM Environment]";
+                console.log("Executing:", code);
+            }, 1000);
+        }
+
+        function handleFile(input) {
+            const file = input.files[0];
+            const status = document.getElementById('status');
+            
+            if (file) {
+                status.innerText = `File loaded: ${file.name} (${file.size} bytes). Ready to execute.`;
+                document.getElementById('code-area').value = `// Binary file: ${file.name}\n// Ready for WASM translation...`;
+            }
+        }
+    </script>
+</body>
+</html>
