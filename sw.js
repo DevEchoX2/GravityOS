@@ -1,5 +1,5 @@
 const CACHE_NAME = 'gravity-os-v1';
-importScripts('/assets/games/cache.sw-js');
+const GAME_CACHE_NAME = 'gravity-games-v1';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -8,7 +8,6 @@ const ASSETS_TO_CACHE = [
   '/assets/games/games.html',
   '/assets/games/games.js',
   '/assets/games/games.css',
-  '/assets/games/cache.sw-js',
   '/assets/json/zones.json',
   '/assets/themes/themes.json',
   '/assets/proxy/proxy.html',
@@ -44,11 +43,34 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Cache game covers and game files from GitHub or local assets
+  const isGameAsset = url.href.includes('GravityOS-Assets/main/covers') || 
+                      url.href.includes('GravityOS-Assets/main/files') ||
+                      url.pathname.includes('/assets/games/covers/') || 
+                      url.pathname.includes('/assets/games/files/');
+
+  if (isGameAsset) {
+    event.respondWith(
+      caches.open(GAME_CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((response) => {
+          return response || fetch(event.request).then((fetchResponse) => {
+            if (fetchResponse.status === 200) {
+              cache.put(event.request, fetchResponse.clone());
+            }
+            return fetchResponse;
+          }).catch(() => response);
+        });
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request).then((fetchResponse) => {
         return caches.open(CACHE_NAME).then((cache) => {
-          // Only cache successful GET requests
           if (event.request.method === 'GET' && fetchResponse.status === 200) {
             cache.put(event.request, fetchResponse.clone());
           }
@@ -56,7 +78,6 @@ self.addEventListener('fetch', (event) => {
         });
       });
     }).catch(() => {
-      // Fallback for offline mode if fetch fails and not in cache
       if (event.request.mode === 'navigate') {
         return caches.match('/index.html');
       }
