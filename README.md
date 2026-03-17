@@ -36,7 +36,7 @@ We reserve the right to suspend or terminate your access to GravityOS at our sol
 We may update these terms occasionally. We will post the "Last Updated" date at the top of this document. Continued use of GravityOS after changes constitutes acceptance of the new terms.
 
 # 7. Contact
-If you have questions regarding these terms, please contact us at: [devechox@gmail.com/Discord.com]
+If you have questions regarding these terms, please contact us at: [devechox@gmail.com/https://discord.com/JrufmERxJn]
 
 A Note on "Proxy" Sites
 Since GravityOS involves proxying content, you may want to add a specific clause regarding Copyright and DMCA:
