@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browser - gravityOS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+        :root {
+            --browser-bg: #000;
+            --browser-text: #fff;
+            --browser-accent: #3b82f6;
+            --nav-bg: #000;
+            --input-bg: rgba(255, 255, 255, 0.05);
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--browser-bg);
+            color: var(--browser-text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #browser-header {
+            background: var(--nav-bg);
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10;
+        }
+        .tab-bar {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 5px;
+            background: #000;
+        }
+        .browser-tabs {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .browser-tabs::-webkit-scrollbar { display: none; }
+        
+        .browser-tab {
+            height: 32px;
+            padding: 0 12px;
+            background: transparent;
+            border-radius: 8px 8px 0 0;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            max-width: 200px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            border-top: 2px solid transparent;
+        }
+        .browser-tab.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 2px solid #fff;
+        }
+        .tab-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tab-close {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 10px;
+            opacity: 0;
+        }
+        .browser-tab:hover .tab-close {
+            opacity: 0.5;
+        }
+        .tab-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+        .add-tab {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 18px;
+            opacity: 0.6;
+        }
+        .add-tab:hover {
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 1;
+        }
+
+        #nav-bar {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 15px;
+            background: #000;
+        }
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+        }
+        .nav-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .nav-btn:hover {
+            opacity: 1;
+        }
+        #url-bar-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #url-bar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        #url-bar:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .search-engine-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+        .menu-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div id="browser-header">
+        <div class="tab-bar">
+            <div class="browser-tabs" id="tabs-container">
+                <div class="add-tab" onclick="createNewTab()">+</div>
+            </div>
+        </div>
+        <div id="nav-bar">
+            <div class="nav-controls">
+                <div class="nav-btn" title="Back" onclick="goBack()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </div>
+                <div class="nav-btn" title="Forward" onclick="goForward()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+                <div class="nav-btn" title="Reload" onclick="reloadTab()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                </div>
+            </div>
+            <div id="url-bar-container">
+                <select id="search-engine" class="search-engine-select">
+                    <option value="google">Google</option>
+                    <option value="duckduckgo" selected>DuckDuckGo</option>
+                    <option value="brave">Brave</option>
+                    <option value="bing">Bing</option>
+                </select>
+                <input type="text" id="url-bar" placeholder="Search or enter address" autocomplete="off">
+            </div>
+            <div class="menu-btn" onclick="toggleMenu()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </div>
+        </div>
+    </div>
+    <div id="viewports-container" style="flex:1; position:relative;">
+    </div>
+
+    <div id="browser-menu" style="display:none; position:absolute; right:15px; top:95px; background:rgba(20, 20, 20, 0.95); backdrop-filter:blur(20px); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; padding:8px; z-index:1000; width:200px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="window.parent.loadPage('extensions')">Manage Extensions</div>
+        <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="alert('EXE support coming soon!')">Run .EXE</div>
+        <div style="height:1px; background:rgba(255,255,255,0.05); margin:5px 0;"></div>
+        <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px; color:#ff4444;" onmouseover="this.style.background='rgba(255,0,0,0.05)'" onmouseout="this.style.background='transparent'" onclick="location.reload()">Clear Cache</div>
+    </div>
+
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <script src="/baremux/index.js"></script>
+    <script>
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                const theme = event.data.theme;
+                for (const key in theme) {
+                    document.documentElement.style.setProperty(`--${key}`, theme[key]);
+                }
+                document.body.style.backgroundColor = theme['bg-color'];
+                document.body.style.color = theme['text-color'];
+                
+                const header = document.getElementById('browser-header');
+                const navBar = document.getElementById('nav-bar');
+                const tabBar = document.querySelector('.tab-bar');
+                if (header) header.style.backgroundColor = theme['sidebar-bg'];
+                if (navBar) navBar.style.backgroundColor = theme['sidebar-bg'];
+                if (tabBar) tabBar.style.backgroundColor = theme['sidebar-bg'];
+                
+                const urlBar = document.getElementById('url-bar');
+                if (urlBar) {
+                    urlBar.style.backgroundColor = theme['card-bg'];
+                    urlBar.style.color = theme['text-color'];
+                    urlBar.style.borderColor = theme['border-color'];
+                }
+            }
+        });
+    </script>
+    <script src="proxy.js"></script>
+</body>
+</html>
