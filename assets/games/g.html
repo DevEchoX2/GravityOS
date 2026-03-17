@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games - gravityOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="g.css">
+</head>
+<body>
+    <div class="header-area">
+        <h1>Games</h1>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search games...">
+        </div>
+    </div>
+    <div class="games-grid" id="games-grid">
+       <p class="loading">Loading files...</p>
+    </div>
+
+    <div id="gameContainer">
+        <div id="gameHeader">
+            <button class="back-btn" onclick="closeGame()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <span id="game-title">Game</span>
+            <div style="display: flex; gap: 15px;">
+                <button class="viewer-action" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="viewer-action" onclick="closeGame()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="gameContent"></div>
+    </div>
+
+    <script src="g.js"></script>
+</body>
+</html>
