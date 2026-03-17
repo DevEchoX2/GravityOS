@@ -8,7 +8,7 @@ const searchInput = document.getElementById("search");
 let allGames = [];
 let popularityMap = {};
 
-// 1. Fetch Popularity Stats
+
 fetch(POP_URL)
   .then((r) => r.json())
   .then((data) => {
@@ -19,8 +19,8 @@ fetch(POP_URL)
   })
   .catch(() => console.warn("Could not load popularity stats."));
 
-// 2. Fetch Games Database
-fetch("/assets/json/zones.json?v=" + Date.now())
+
+fetch("../json/zones.json?v=" + Date.now())
   .then((r) => {
     if (!r.ok) throw new Error(`HTTP ${r.status} - ${r.statusText}`);
     const contentType = r.headers.get("content-type");
@@ -37,7 +37,7 @@ fetch("/assets/json/zones.json?v=" + Date.now())
       popularity: popularityMap[g.id] || 0,
     }));
 
-    // Sort by popularity by default
+    
     allGames.sort((a, b) => b.popularity - a.popularity);
 
     render(allGames);
@@ -46,7 +46,7 @@ fetch("/assets/json/zones.json?v=" + Date.now())
     gameGrid.innerHTML = `<p class="error">Failed to load games: ${err.message}</p>`;
   });
 
-// 3. Render Grid
+
 function render(games) {
   gameGrid.innerHTML = "";
   
@@ -80,7 +80,7 @@ function render(games) {
   lazyLoadImages();
 }
 
-// 4. Lazy Loading Logic
+
 function lazyLoadImages() {
   const images = gameGrid.querySelectorAll("img[data-src]");
   const observer = new IntersectionObserver(
@@ -101,7 +101,7 @@ function lazyLoadImages() {
   images.forEach((img) => observer.observe(img));
 }
 
-// 5. Search Logic
+
 searchInput.addEventListener("input", (e) => {
   const query = e.target.value.toLowerCase();
   const filtered = allGames.filter((g) => g.name && g.name.toLowerCase().includes(query));
