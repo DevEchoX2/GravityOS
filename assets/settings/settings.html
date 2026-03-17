@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - gravityOS</title>
+    <style>
+        body {
+            padding: 40px;
+            background: transparent;
+            color: var(--text-color, white);
+            font-family: sans-serif;
+        }
+        .settings-section {
+            background: var(--card-bg, rgba(255, 255, 255, 0.05));
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        select, input[type="text"] {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color, white);
+            padding: 8px 12px;
+            border-radius: 8px;
+            outline: none;
+        }
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background: #333;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle.active {
+            background: var(--accent-color, #3b82f6);
+        }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: left 0.3s;
+        }
+        .toggle.active::after {
+            left: 27px;
+        }
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .theme-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings</h1>
+    
+    <div class="settings-section">
+        <h2>Appearance</h2>
+        <div class="setting-item">
+            <div>
+                <div style="font-weight:600;">Theme</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Select your preferred interface theme</div>
+            </div>
+        </div>
+        <div class="theme-grid" id="theme-grid">
+            <!-- Themes will be loaded here -->
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>Proxy Configuration</h2>
+        <div class="setting-item">
+            <div>
+                <div style="font-weight:600;">Proxy Engine</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Select the backend engine</div>
+            </div>
+            <select id="engine-select">
+                <option value="ultraviolet">Ultraviolet</option>
+                <option value="scramjet">Scramjet</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <div>
+                <div style="font-weight:600;">Transport</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Select the transport layer</div>
+            </div>
+            <select id="transport-select">
+                <option value="libcurl">Libcurl</option>
+                <option value="epoxy">Epoxy</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <div>
+                <div style="font-weight:600;">Favicon Cloaking</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Hide the proxy favicon in browser history</div>
+            </div>
+            <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <h2>System</h2>
+        <div class="setting-item">
+            <div>
+                <div style="font-weight:600;">Favicon Cloaking</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Disguise the tab as Google Drive</div>
+            </div>
+            <select id="cloak-select" onchange="toggleCloak()">
+                <option value="none">None</option>
+                <option value="drive">Google Drive</option>
+            </select>
+        </div>
+        <div class="setting-item">
+            <div>
+                <div style="font-weight:600;">Linux Mode</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Coming Soon</div>
+            </div>
+            <div style="opacity: 0.3; cursor: not-allowed;">
+                <div class="toggle"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const themeGrid = document.getElementById('theme-grid');
+
+        window.parent.postMessage({ type: 'requestThemes' }, '*');
+
+        function toggleCloak() {
+            const mode = document.getElementById('cloak-select').value;
+            window.parent.postMessage({ type: 'cloak', mode: mode }, '*');
+        }
+
+        const savedCloak = localStorage.getItem('gravity_cloak');
+        if (savedCloak) {
+            document.getElementById('cloak-select').value = savedCloak;
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themesList') {
+                themeGrid.innerHTML = '';
+                event.data.themes.forEach(theme => {
+                    const btn = document.createElement('div');
+                    btn.className = 'theme-btn';
+                    btn.style.background = theme.colors['bg-color'];
+                    btn.style.color = theme.colors['text-color'];
+                    btn.style.borderColor = theme.colors['border-color'];
+                    btn.innerText = theme.name;
+                    btn.onclick = () => {
+                        window.parent.postMessage({ type: 'setTheme', theme: theme }, '*');
+                    };
+                    themeGrid.appendChild(btn);
+                });
+            } else if (event.data.type === 'themeChange') {
+                const theme = event.data.theme;
+                for (const key in theme) {
+                    document.documentElement.style.setProperty(`--${key}`, theme[key]);
+                }
+                
+                document.body.style.color = theme['text-color'];
+                document.querySelectorAll('h1, h2, .setting-item div, .theme-btn').forEach(el => {
+                    el.style.color = theme['text-color'];
+                });
+                
+                const borderColor = theme['text-color'] === '#000000' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+                document.querySelectorAll('.settings-section, .setting-item, .theme-btn').forEach(el => {
+                    el.style.borderColor = borderColor;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
