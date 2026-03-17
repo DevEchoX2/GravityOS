@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+        :root {
+            --bg-color: #000;
+            --text-color: #fff;
+            --accent-color: #fff;
+            --grid-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .logo {
+            font-family: 'Pacifico', cursive;
+            font-size: 120px;
+            margin-bottom: 40px;
+            letter-spacing: -2px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-color, #fff);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px 15px 50px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+
+        .engine-selector {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .footer a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            opacity: 1;
+        }
+
+        .ping {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ping-dot {
+            width: 8px;
+            height: 8px;
+            background: #f97316;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">gravityOS</div>
+        
+        <div class="search-container">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" class="search-input" placeholder="Search or type a URL" id="search-input">
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="#">Sign in</a>
+        <a href="#">More links</a>
+        <a href="#">TOS</a>
+        <a href="#">Privacy</a>
+        <div class="ping">
+            <div class="ping-dot"></div>
+            <span>179 ms</span>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('search-input');
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                const theme = event.data.theme;
+                for (const key in theme) {
+                    document.documentElement.style.setProperty(`--${key}`, theme[key]);
+                }
+                document.body.style.color = theme['text-color'];
+                document.body.style.backgroundColor = theme['bg-color'];
+                
+                const gridColor = theme['text-color'] === '#000000' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+                document.body.style.backgroundImage = `
+                    linear-gradient(${gridColor} 1px, transparent 1px),
+                    linear-gradient(90deg, ${gridColor} 1px, transparent 1px)
+                `;
+                
+                const logo = document.querySelector('.logo');
+                if (logo) {
+                    logo.style.setProperty('--accent-color', theme['accent-color']);
+                }
+            }
+        });
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = input.value;
+                if (query) {
+                    let targetUrl = query;
+                    if (!query.startsWith('http')) {
+                        targetUrl = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+                    }
+                    window.parent.postMessage({ type: 'loadUrl', url: targetUrl }, '*');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
