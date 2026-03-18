@@ -15,14 +15,14 @@
         </script>
         <style>
 :root {
-    --bg-color: #050505;
+    --bg-color: #000000;
     --accent-color: #3b82f6;
     --text-color: #ffffff;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --glass-bg: rgba(10, 10, 10, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --transition-speed: 0.5s;
+    --card-bg: rgba(255, 255, 255, 0.002);
+    --border-color: rgba(255, 255, 255, 0.02);
+    --glass-bg: rgba(2, 2, 2, 0.3);
+    --glass-border: rgba(255, 255, 255, 0.04);
+    --transition-speed: 1s;
     --font-main: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -43,6 +43,22 @@ body {
     position: relative;
 }
 
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 2% 2%, rgba(59, 130, 246, 0.01) 0%, transparent 20%),
+        radial-gradient(circle at 98% 98%, rgba(59, 130, 246, 0.005) 0%, transparent 20%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: -1;
+}
+
 #particles-js {
     position: fixed;
     width: 100%;
@@ -50,7 +66,7 @@ body {
     top: 0;
     left: 0;
     z-index: 0;
-    background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.12) 0%, var(--bg-color) 80%);
+    opacity: 0.2;
 }
 
 #zoneFrame {
@@ -67,23 +83,23 @@ body {
 .gametainer {
     position: relative;
     z-index: 1;
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 120px 40px 80px 40px;
+    padding: 220px 80px 180px 80px;
 }
 
 .search-sec {
-    margin-bottom: 80px;
-    animation: slideUp 1s var(--ease-out) both;
+    margin-bottom: 160px;
+    animation: slideUp 2s var(--ease-out) both;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px); }
+    from { opacity: 0; transform: translateY(120px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 .search-box {
-    max-width: 700px;
+    max-width: 900px;
     margin: 0 auto;
     position: relative;
 }
@@ -93,32 +109,33 @@ body {
     align-items: center;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 18px 28px;
-    backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 48px;
+    padding: 28px 48px;
+    backdrop-filter: blur(100px) saturate(280%);
     transition: all var(--transition-speed) var(--ease-out);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8);
 }
 
 .search-in-wpr:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.005);
+    transform: translateY(-6px);
 }
 
 .search-in-wpr:focus-within {
     border-color: var(--accent-color);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.2);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: 0 0 100px rgba(59, 130, 246, 0.05);
+    transform: translateY(-10px);
 }
 
 .search-icon {
-    width: 22px;
-    height: 22px;
+    width: 32px;
+    height: 32px;
     color: var(--accent-color);
-    margin-right: 20px;
+    margin-right: 40px;
     flex-shrink: 0;
-    opacity: 0.9;
+    opacity: 0.4;
 }
 
 .search-input {
@@ -127,44 +144,44 @@ body {
     border: none;
     outline: none;
     color: #fff;
-    font-size: 18px;
+    font-size: 28px;
     font-family: inherit;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.07em;
     font-weight: 400;
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.05);
 }
 
 .game-cont {
-    animation: slideUp 1s var(--ease-out) 0.1s both;
+    animation: slideUp 2s var(--ease-out) 0.6s both;
 }
 
 .gamegrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 32px;
-    margin-bottom: 60px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 72px;
+    margin-bottom: 160px;
 }
 
 .gcard {
     aspect-ratio: 1;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 32px;
+    border-radius: 72px;
     cursor: pointer;
     transition: all var(--transition-speed) var(--ease-out);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(30px);
     position: relative;
     overflow: hidden;
 }
 
 .gcard:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(59, 130, 246, 0.5);
-    transform: translateY(-12px) scale(1.03);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.15);
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(59, 130, 246, 0.1);
+    transform: translateY(-32px) scale(1.08);
+    box-shadow: 0 80px 160px rgba(0, 0, 0, 1), 0 0 80px rgba(59, 130, 246, 0.02);
 }
 
 .gicon {
@@ -177,18 +194,18 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.01);
+    background: rgba(255, 255, 255, 0.0005);
 }
 
 .gicon img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.8s var(--ease-out);
+    transition: transform 1.8s var(--ease-out);
 }
 
 .gcard:hover .gicon img {
-    transform: scale(1.15);
+    transform: scale(1.4);
 }
 
 .game-nm {
@@ -196,16 +213,16 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
-    padding: 40px 20px 20px;
-    font-size: 15px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 95%, transparent 100%);
+    padding: 90px 40px 40px;
+    font-size: 24px;
     font-weight: 600;
     color: #fff;
     text-align: center;
     opacity: 0;
-    transform: translateY(15px);
-    transition: all 0.4s var(--ease-out);
-    letter-spacing: -0.02em;
+    transform: translateY(40px);
+    transition: all 0.9s var(--ease-out);
+    letter-spacing: -0.07em;
 }
 
 .gcard:hover .game-nm {
@@ -218,24 +235,24 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 120px 24px;
-    color: rgba(255, 255, 255, 0.15);
+    padding: 220px 24px;
+    color: rgba(255, 255, 255, 0.02);
     background: var(--card-bg);
-    border-radius: 40px;
+    border-radius: 80px;
     border: 1px dashed var(--border-color);
 }
 
 .empty-state i {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 24px;
-    stroke-width: 1;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 64px;
+    stroke-width: 0.1;
 }
 
 .back-btn {
     position: fixed !important;
-    top: 40px !important;
-    left: 40px !important;
+    top: 80px !important;
+    left: 80px !important;
     z-index: 10000 !important;
     cursor: pointer;
 }
@@ -246,40 +263,40 @@ body {
     justify-content: center;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    width: 52px;
-    height: 52px;
-    backdrop-filter: blur(30px) saturate(180%);
-    transition: all 0.5s var(--ease-out);
+    border-radius: 50px;
+    width: 100px;
+    height: 100px;
+    backdrop-filter: blur(100px) saturate(280%);
+    transition: all 1s var(--ease-out);
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
 }
 
 .back-btn-in i {
-    width: 24px;
-    height: 24px;
+    width: 44px;
+    height: 44px;
     color: #fff;
     flex-shrink: 0;
 }
 
 .back-txt {
     color: #fff;
-    font-size: 16px;
+    font-size: 26px;
     font-weight: 600;
     white-space: nowrap;
     opacity: 0;
     width: 0;
     margin-left: 0;
-    transition: all 0.4s var(--ease-out);
-    letter-spacing: -0.02em;
+    transition: all 0.9s var(--ease-out);
+    letter-spacing: -0.07em;
 }
 
 .back-btn:hover .back-btn-in {
     width: auto;
-    padding: 0 24px 0 20px;
+    padding: 0 64px 0 56px;
     background: #fff;
     border-color: #fff;
-    box-shadow: 0 12px 40px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 50px 120px rgba(255, 255, 255, 0.02);
 }
 
 .back-btn:hover .back-btn-in i {
@@ -289,72 +306,72 @@ body {
 .back-btn:hover .back-txt {
     opacity: 1;
     width: auto;
-    margin-left: 12px;
+    margin-left: 24px;
     color: #000;
 }
 
 #fsBtn {
-    top: 108px !important;
+    top: 200px !important;
 }
 
 .prov-sel {
     position: relative;
     display: flex;
     justify-content: center;
-    margin-bottom: 32px;
+    margin-bottom: 80px;
 }
 
 .prov-btn {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 24px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 18px;
-    padding: 12px 22px;
+    border-radius: 36px;
+    padding: 22px 44px;
     cursor: pointer;
     font-family: inherit;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(30px) saturate(180%);
-    transition: all 0.4s var(--ease-out);
-    letter-spacing: 0.08em;
+    font-size: 7px;
+    color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(100px) saturate(280%);
+    transition: all 0.9s var(--ease-out);
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: 900;
 }
 
 .prov-btn:hover {
     border-color: var(--accent-color);
     color: #fff;
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.005);
+    transform: translateY(-8px);
+    box-shadow: 0 30px 70px rgba(59, 130, 246, 0.05);
 }
 
 .prov-badge {
     color: var(--accent-color);
-    text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    text-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
 }
 
 .prov-dropdown {
     display: none;
     position: absolute;
-    top: calc(100% + 16px);
+    top: calc(100% + 40px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 10, 10, 0.9);
+    background: rgba(0, 0, 0, 1);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 64px;
+    backdrop-filter: blur(120px) saturate(280%);
     overflow: hidden;
-    min-width: 240px;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7);
+    min-width: 340px;
+    box-shadow: 0 100px 200px rgba(0, 0, 0, 1);
     z-index: 100;
-    animation: dropIn 0.4s var(--ease-out);
+    animation: dropIn 0.9s var(--ease-out);
 }
 
 @keyframes dropIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(-15px); }
+    from { opacity: 0; transform: translateX(-50%) translateY(-50px); }
     to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
@@ -363,59 +380,58 @@ body {
 .prov-option {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 16px 24px;
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.4);
+    gap: 28px;
+    padding: 36px 64px;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.1);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.8s ease;
     font-weight: 500;
 }
 
 .prov-option:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.005);
     color: #fff;
 }
 
 .prov-option.active {
     color: var(--accent-color);
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.01);
 }
 
 .prov-dot {
-    width: 8px;
-    height: 8px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    transition: all 0.4s ease;
+    background: rgba(255, 255, 255, 0.005);
+    transition: all 0.9s ease;
 }
 
 .prov-option.active .prov-dot {
     background: var(--accent-color);
-    box-shadow: 0 0 12px var(--accent-color);
+    box-shadow: 0 0 40px var(--accent-color);
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 0px; height: 0px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+::-webkit-scrollbar-thumb { background: transparent; }
 
 .offline-indicator {
     text-align: center;
     color: #94a3b8;
-    font-size: 14px;
-    margin-top: 16px;
-    margin-bottom: 24px;
+    font-size: 22px;
+    margin-top: 40px;
+    margin-bottom: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    background: rgba(239, 68, 68, 0.05);
-    padding: 12px 20px;
-    border-radius: 16px;
-    border: 1px solid rgba(239, 68, 68, 0.15);
-    backdrop-filter: blur(10px);
-    animation: fadeIn 0.5s ease;
+    gap: 20px;
+    background: rgba(239, 68, 68, 0.002);
+    padding: 32px 56px;
+    border-radius: 40px;
+    border: 1px solid rgba(239, 68, 68, 0.02);
+    backdrop-filter: blur(50px);
+    animation: fadeIn 2s ease;
 }
 
 @keyframes fadeIn {
@@ -463,6 +479,21 @@ lucide.createIcons();
 let games=[];
 let fGames=[];
 let aGames=[];
+
+// Load theme from localStorage on startup
+(function() {
+    const savedTheme = localStorage.getItem('gravity_theme');
+    if (savedTheme) {
+        try {
+            const theme = JSON.parse(savedTheme);
+            for (const [key, value] of Object.entries(theme.colors)) {
+                document.documentElement.style.setProperty(`--${key}`, value);
+            }
+        } catch (e) {
+            console.error('Failed to apply initial theme to games page:', e);
+        }
+    }
+})();
 
 const COVER_URL = "https://cdn.jsdelivr.net/gh/gn-math/covers@main";
 const HTML_URL = "https://cdn.jsdelivr.net/gh/gn-math/html@main";
