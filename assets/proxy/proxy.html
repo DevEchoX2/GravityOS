@@ -223,6 +223,38 @@
     <script src="/uv/uv.config.js"></script>
     <script src="/baremux/index.js"></script>
     <script>
+        // Load theme from localStorage on startup
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    const colors = theme.colors;
+                    for (const key in colors) {
+                        document.documentElement.style.setProperty(`--${key}`, colors[key]);
+                    }
+                    document.body.style.backgroundColor = colors['bg-color'];
+                    document.body.style.color = colors['text-color'];
+                    
+                    const header = document.getElementById('browser-header');
+                    const navBar = document.getElementById('nav-bar');
+                    const tabBar = document.querySelector('.tab-bar');
+                    if (header) header.style.backgroundColor = colors['sidebar-bg'];
+                    if (navBar) navBar.style.backgroundColor = colors['sidebar-bg'];
+                    if (tabBar) tabBar.style.backgroundColor = colors['sidebar-bg'];
+                    
+                    const urlBar = document.getElementById('url-bar');
+                    if (urlBar) {
+                        urlBar.style.backgroundColor = colors['card-bg'];
+                        urlBar.style.color = colors['text-color'];
+                        urlBar.style.borderColor = colors['border-color'];
+                    }
+                } catch (e) {
+                    console.error('Failed to apply initial theme to proxy:', e);
+                }
+            }
+        })();
+
         window.addEventListener('message', (event) => {
             if (event.data.type === 'themeChange') {
                 const theme = event.data.theme;
