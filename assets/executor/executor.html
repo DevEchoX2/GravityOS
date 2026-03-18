@@ -100,6 +100,29 @@
     </div>
 
     <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    for (const [key, value] of Object.entries(theme.colors)) {
+                        document.documentElement.style.setProperty(`--${key}`, value);
+                    }
+                } catch (e) {
+                    console.error('Failed to apply initial theme to executor:', e);
+                }
+            }
+        })();
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                const colors = event.data.theme;
+                for (const [key, value] of Object.entries(colors)) {
+                    document.documentElement.style.setProperty(`--${key}`, value);
+                }
+            }
+        });
+
         function execute() {
             const code = document.getElementById('code-area').value;
             const status = document.getElementById('status');
