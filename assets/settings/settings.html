@@ -162,6 +162,21 @@
     </div>
 
     <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    for (const [key, value] of Object.entries(theme.colors)) {
+                        document.documentElement.style.setProperty(`--${key}`, value);
+                    }
+                    document.body.style.color = theme.colors['text-color'];
+                } catch (e) {
+                    console.error('Failed to apply initial theme to settings:', e);
+                }
+            }
+        })();
+
         const themeGrid = document.getElementById('theme-grid');
 
         window.parent.postMessage({ type: 'requestThemes' }, '*');
