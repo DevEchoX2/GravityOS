@@ -117,6 +117,20 @@
     </div>
 
     <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    for (const [key, value] of Object.entries(theme.colors)) {
+                        document.documentElement.style.setProperty(`--${key}`, value);
+                    }
+                } catch (e) {
+                    console.error('Failed to apply initial theme to apps:', e);
+                }
+            }
+        })();
+
         function launch(url) {
             window.parent.loadProxy(url);
         }
@@ -126,7 +140,12 @@
         }
 
         window.addEventListener('message', (event) => {
-            // Apps page logic
+            if (event.data.type === 'themeChange') {
+                const colors = event.data.theme;
+                for (const [key, value] of Object.entries(colors)) {
+                    document.documentElement.style.setProperty(`--${key}`, value);
+                }
+            }
         });
     </script>
 </body>
