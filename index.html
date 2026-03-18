@@ -141,6 +141,22 @@
             z-index: 2001;
         }
     </style>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    const root = document.documentElement;
+                    for (const [key, value] of Object.entries(theme.colors)) {
+                        root.style.setProperty(`--${key}`, value);
+                    }
+                } catch (e) {
+                    console.error('Failed to apply initial theme:', e);
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
     <nav id="sidebar">
