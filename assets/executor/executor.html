@@ -48,6 +48,10 @@
             3. Click the bookmark you just made.
         </div>
         
+        <div class="status-header" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <span style="font-size:0.8rem; opacity:0.6; font-family:monospace;">LIVE CONSOLE</span>
+            <button class="secondary" style="padding:4px 12px; font-size:0.7rem;" onclick="document.getElementById('status').innerText = 'Console cleared.'">Clear</button>
+        </div>
         <div class="status" id="status">Ready.</div>
     </div>
 
@@ -126,11 +130,16 @@
                 return;
             }
 
-            status.innerText = "Executing...";
+            status.innerText = "Executing...\n";
             
+            const onLog = (msg) => {
+                status.innerText += `[LOG] ${msg}\n`;
+                status.scrollTop = status.scrollHeight;
+            };
+
             let result;
             if (currentFileBuffer) {
-                result = await executeCode(currentFileBuffer, 'wasm');
+                result = await executeCode(currentFileBuffer, 'wasm', onLog);
             } else {
                 const hubSelect = document.getElementById('hub-select');
                 const hubValue = hubSelect.value;
@@ -140,20 +149,21 @@
                 if (hubValue) {
                     const [cat, name] = hubValue.split(':');
                     if (ScriptHub[cat][name].code === code) {
-                        result = await executeCode(`hub:${hubValue}`, langSelect.value);
+                        result = await executeCode(`hub:${hubValue}`, langSelect.value, onLog);
                     } else {
-                        result = await executeCode(code, langSelect.value);
+                        result = await executeCode(code, langSelect.value, onLog);
                     }
                 } else {
-                    result = await executeCode(code, langSelect.value);
+                    result = await executeCode(code, langSelect.value, onLog);
                 }
             }
 
             if (result.success) {
-                status.innerText = `Success!\n${result.logs ? 'Logs:\n' + result.logs + '\n' : ''}Result: ${result.result}`;
+                status.innerText += `\n--- Execution Finished ---\nResult: ${result.result}`;
             } else {
-                status.innerText = `Error: ${result.error}${result.logs ? '\nLogs:\n' + result.logs : ''}`;
+                status.innerText += `\n--- Error ---\n${result.error}`;
             }
+            status.scrollTop = status.scrollHeight;
         }
 
         window.handleFile = function(input) {
