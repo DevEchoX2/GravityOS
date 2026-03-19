@@ -166,10 +166,6 @@
         <h1 style="margin: 0; font-weight: 700; letter-spacing: -0.02em;">AI Assistant</h1>
         <div class="stats">
             <span id="req-count">Requests: 0/40</span>
-            <button class="settings-btn" onclick="openSettings()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                API Keys
-            </button>
         </div>
     </div>
 
@@ -196,8 +192,6 @@
     </div>
 
     <script type="module">
-        import { GoogleGenAI } from "@google/genai";
-
         (function() {
             const savedTheme = localStorage.getItem('gravity_theme');
             if (savedTheme) {
@@ -276,30 +270,28 @@
         }
 
         async function getAIResponse(prompt) {
-            const apiKey = getApiKey();
-            if (!apiKey) {
-                return "Error: No API key found. Please add one in the settings (gear icon) to continue.";
-            }
-
-            const ai = new GoogleGenAI({ apiKey });
-
             try {
-                const response = await ai.models.generateContent({
-                    model: "gemini-3-flash-preview",
-                    contents: [{ parts: [{ text: prompt }] }]
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt })
                 });
                 
-                if (!response || !response.text) {
-                    throw new Error("Empty response from AI");
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to get AI response");
                 }
                 
-                return response.text;
+                return data.text;
             } catch (e) {
                 console.error("AI Error:", e);
-                if (e.message?.includes("API_KEY_INVALID")) {
-                    return "Error: The API key provided is invalid. Please check your settings.";
+                if (e.message.includes("GEMINI_API_KEY not found")) {
+                    return "Error: GEMINI_API_KEY is missing. Please add it to the 'Secrets' menu in AI Studio Settings.";
                 }
-                return "Sorry, I'm having trouble connecting to my brain right now. Please check your internet or API key settings.";
+                return "Sorry, I'm having trouble connecting to my brain right now. Please check your internet or server status.";
             }
         }
 
@@ -334,8 +326,11 @@
             updateReqCount();
         };
 
-        input.onkeypress = (e) => {
-            if (e.key === 'Enter') btn.onclick();
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btn.click();
+            }
         };
     </script>
 </body>
