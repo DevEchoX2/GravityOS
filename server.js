@@ -17,11 +17,19 @@ async function startServer() {
   // API Route for AI Assistant
   app.post('/api/ai', async (req, res) => {
     const { prompt } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const rawKeys = process.env.GEMINI_API_KEY;
 
-    if (!apiKey) {
+    if (!rawKeys) {
       return res.status(500).json({ error: "GEMINI_API_KEY not found in server environment. Please add it to AI Studio Secrets." });
     }
+
+    // Split keys by comma and pick one at random
+    const keys = rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    if (keys.length === 0) {
+      return res.status(500).json({ error: "No valid API keys found in GEMINI_API_KEY environment variable." });
+    }
+    
+    const apiKey = keys[Math.floor(Math.random() * keys.length)];
 
     try {
       const ai = new GoogleGenAI({ apiKey });
