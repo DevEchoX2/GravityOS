@@ -329,7 +329,7 @@
             } catch (e) {
                 typing.style.display = 'none';
                 console.error("AI Error:", e);
-                addMessage("Sorry, I'm having trouble connecting to my brain right now.", false);
+                addMessage("Error: " + e.message, false);
             }
         };
 
