@@ -35,16 +35,25 @@ export const createRobloxEnv = (logFn) => ({
     print: (...args) => logFn(args.join(' ')),
     warn: (...args) => logFn('WARN: ' + args.join(' ')),
     error: (...args) => logFn('ERROR: ' + args.join(' ')),
-    Vector3: RobloxAPI.Vector3,
-    Color3: RobloxAPI.Color3,
-    UDim2: RobloxAPI.UDim2,
-    Instance: RobloxAPI.Instance,
+    Vector3: {
+        new: (x, y, z) => RobloxAPI.Vector3.new(Number(x) || 0, Number(y) || 0, Number(z) || 0)
+    },
+    Color3: {
+        new: (r, g, b) => RobloxAPI.Color3.new(Number(r) || 0, Number(g) || 0, Number(b) || 0),
+        fromRGB: (r, g, b) => RobloxAPI.Color3.fromRGB(Number(r) || 0, Number(g) || 0, Number(b) || 0)
+    },
+    UDim2: {
+        new: (xs, xo, ys, yo) => RobloxAPI.UDim2.new(Number(xs) || 0, Number(xo) || 0, Number(ys) || 0, Number(yo) || 0)
+    },
+    Instance: {
+        new: (className) => RobloxAPI.Instance.new(className)
+    },
     game: {
         GetService: (name) => ({ Name: name, ClassName: "Service" }),
         Workspace: { Name: "Workspace", Gravity: 196.2, Terrain: {} },
         Players: { LocalPlayer: { Name: "Player1", UserId: 12345678 } }
     },
-    wait: (s) => new Promise(r => setTimeout(r, (s || 0) * 1000)),
+    wait: (s) => new Promise(r => setTimeout(r, (Number(s) || 0) * 1000)),
     tick: () => Date.now() / 1000,
-    delay: (s, f) => setTimeout(f, s * 1000)
+    delay: (s, f) => setTimeout(f, (Number(s) || 0) * 1000)
 });
