@@ -33,9 +33,35 @@ export async function executeCode(code, type = 'js') {
     } else if (type === 'wasm') {
         try {
             const buffer = typeof code === 'string' ? hexToUint8Array(code) : code;
-            const { instance } = await WebAssembly.instantiate(buffer);
+            
+            let instance;
+            const importObject = {
+                env: {
+                    redirect: (ptr, len) => {
+                        if (!instance) return;
+                        const memory = instance.exports.memory;
+                        const url = new TextDecoder().decode(new Uint8Array(memory.buffer, ptr, len));
+                        console.log('WASM requested redirect to:', url);
+                        // Using window.open as requested
+                        window.open(url, '_blank');
+                    },
+                    log: (ptr, len) => {
+                        if (!instance) return;
+                        const memory = instance.exports.memory;
+                        const msg = new TextDecoder().decode(new Uint8Array(memory.buffer, ptr, len));
+                        console.log('[WASM]:', msg);
+                    }
+                }
+            };
+
+            const wasmResult = await WebAssembly.instantiate(buffer, importObject);
+            instance = wasmResult.instance;
             const exports = Object.keys(instance.exports);
             
+            // If the WASM has a 'main' or 'start' function, run it
+            if (instance.exports.main) instance.exports.main();
+            else if (instance.exports._start) instance.exports._start();
+
             return {
                 success: true,
                 result: `WASM Module loaded. Exports: ${exports.join(', ')}`,
