@@ -8,6 +8,10 @@ import { GoogleGenAI } from "@google/genai";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// PASTE YOUR API KEYS HERE IF YOU CAN'T USE THE SECRETS MENU
+// Example: const HARDCODED_KEYS = ["AIza...", "AIza..."];
+const HARDCODED_KEYS = [];
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -17,15 +21,22 @@ async function startServer() {
   // API Route for AI Assistant (Streaming)
   app.post('/api/ai', async (req, res) => {
     const { prompt } = req.body;
+    
+    // Try to get keys from Secrets menu first, then fallback to hardcoded keys
     const rawKeys = process.env.GEMINI_API_KEY;
+    let keys = [];
 
-    if (!rawKeys) {
-      return res.status(500).json({ error: "GEMINI_API_KEY not found in server environment." });
+    if (rawKeys) {
+      keys = rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 0);
     }
 
-    const keys = rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    // If no keys in Secrets, use the hardcoded ones
+    if (keys.length === 0 && HARDCODED_KEYS.length > 0) {
+      keys = HARDCODED_KEYS;
+    }
+
     if (keys.length === 0) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is empty or invalid. Please add your keys separated by commas." });
+      return res.status(500).json({ error: "No API keys found. Please add them to either the 'Secrets' menu or the HARDCODED_KEYS array in server.js." });
     }
     
     const apiKey = keys[Math.floor(Math.random() * keys.length)];
