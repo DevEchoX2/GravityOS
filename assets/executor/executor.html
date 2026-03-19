@@ -108,7 +108,21 @@
             if (currentFileBuffer) {
                 result = await executeCode(currentFileBuffer, 'wasm');
             } else {
-                result = await executeCode(code, langSelect.value);
+                const hubSelect = document.getElementById('hub-select');
+                const hubValue = hubSelect.value;
+                
+                // If the code in the area matches the hub item's code, use the hub shortcut
+                // This ensures the target URL is opened
+                if (hubValue) {
+                    const [cat, name] = hubValue.split(':');
+                    if (ScriptHub[cat][name].code === code) {
+                        result = await executeCode(`hub:${hubValue}`, langSelect.value);
+                    } else {
+                        result = await executeCode(code, langSelect.value);
+                    }
+                } else {
+                    result = await executeCode(code, langSelect.value);
+                }
             }
 
             if (result.success) {
