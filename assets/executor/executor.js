@@ -14,18 +14,29 @@ export async function executeCode(code, type = 'js', onLog = null) {
         try {
             // Check if it's a ScriptHub shortcut
             if (code.startsWith('hub:')) {
-                const [_, category, name] = code.split(':');
+                const parts = code.split(':');
+                const category = parts[1];
+                const name = parts.slice(2).join(':');
                 const hubItem = ScriptHub[category]?.[name];
+                
                 if (hubItem) {
                     if (hubItem.url) {
                         logFn(`Opening ${hubItem.url}...`);
                         window.open(hubItem.url, '_blank');
                     }
                     code = hubItem.code;
+                } else {
+                    throw new Error(`Script Hub item not found: ${category}:${name}`);
                 }
             }
 
-            let result = eval(code);
+            // Strip javascript: prefix if present (common in bookmarklets)
+            let cleanCode = code.trim();
+            if (cleanCode.toLowerCase().startsWith('javascript:')) {
+                cleanCode = cleanCode.substring(11);
+            }
+
+            let result = eval(cleanCode);
             if (result instanceof Promise) {
                 result = await result;
             }
