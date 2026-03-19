@@ -10,7 +10,12 @@ const __dirname = path.dirname(__filename);
 
 // PASTE YOUR API KEYS HERE IF YOU CAN'T USE THE SECRETS MENU
 // Example: const HARDCODED_KEYS = ["AIza...", "AIza..."];
-const HARDCODED_KEYS = [];
+const HARDCODED_KEYS = [
+  "AIzaSyA6rzqE5QHdt_a4M4CyUu2wDfmiTF1ZsRI",
+  "AIzaSyDtrELchrLQlYhX02NnB4-YrUEUJC1JWzw",
+  "AIzaSyCVwRBq9MP02HiB90uoNVj-VTI1r9wRznI",
+  "AIzaSyDyXzQrTjJHtBvzN5rwgJIN7QC1XGOyP-4"
+];
 
 async function startServer() {
   const app = express();
