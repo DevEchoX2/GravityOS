@@ -21,6 +21,12 @@
             height: 100vh;
             box-sizing: border-box;
         }
+        .header-wpr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         #chat-container {
             flex: 1;
             background: var(--card-bg);
@@ -41,6 +47,7 @@
             font-size: 14px;
             line-height: 1.5;
             animation: fadeIn 0.3s ease;
+            word-wrap: break-word;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -96,11 +103,76 @@
             opacity: 0.5;
             margin-left: 10px;
             display: none;
+            margin-bottom: 10px;
+        }
+        .stats {
+            font-size: 12px;
+            opacity: 0.6;
+            display: flex;
+            gap: 15px;
+        }
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #settings-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 24px;
+            z-index: 1000;
+            width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+        .key-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            outline: none;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <h1 style="margin-bottom: 20px; font-weight: 700; letter-spacing: -0.02em;">AI Assistant</h1>
+    <div class="header-wpr">
+        <h1 style="margin: 0; font-weight: 700; letter-spacing: -0.02em;">AI Assistant</h1>
+        <div class="stats">
+            <span id="req-count">Requests: 0/40</span>
+            <button class="settings-btn" onclick="openSettings()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                API Keys
+            </button>
+        </div>
+    </div>
+
     <div id="chat-container">
         <div class="message ai-message">Hello! I'm your gravityOS assistant. How can I help you today?</div>
     </div>
@@ -112,7 +184,20 @@
         </button>
     </div>
 
-    <script>
+    <div class="modal-overlay" id="overlay" onclick="closeSettings()"></div>
+    <div id="settings-modal">
+        <h2 style="margin-top:0; font-size:1.2rem;">API Key Settings</h2>
+        <p style="font-size:0.8rem; opacity:0.6; margin-bottom:20px;">Add up to 4 Gemini API keys. The system will rotate through them.</p>
+        <input type="password" class="key-input" id="key-1" placeholder="API Key 1">
+        <input type="password" class="key-input" id="key-2" placeholder="API Key 2">
+        <input type="password" class="key-input" id="key-3" placeholder="API Key 3">
+        <input type="password" class="key-input" id="key-4" placeholder="API Key 4">
+        <button onclick="saveSettings()" style="width:100%; padding:12px; background:var(--accent-color); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:600;">Save Settings</button>
+    </div>
+
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
         (function() {
             const savedTheme = localStorage.getItem('gravity_theme');
             if (savedTheme) {
@@ -140,6 +225,83 @@
         const btn = document.getElementById('send-btn');
         const container = document.getElementById('chat-container');
         const typing = document.getElementById('typing-indicator');
+        const reqCountEl = document.getElementById('req-count');
+
+        let requests = parseInt(localStorage.getItem('ai_requests') || '0');
+        const MAX_REQUESTS = 40;
+
+        function updateReqCount() {
+            reqCountEl.innerText = `Requests: ${requests}/${MAX_REQUESTS}`;
+            localStorage.setItem('ai_requests', requests);
+        }
+        updateReqCount();
+
+        function openSettings() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('settings-modal').style.display = 'block';
+            
+            const keys = JSON.parse(localStorage.getItem('ai_keys') || '[]');
+            keys.forEach((key, i) => {
+                const el = document.getElementById(`key-${i+1}`);
+                if (el) el.value = key;
+            });
+        }
+        window.openSettings = openSettings;
+
+        function closeSettings() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+        window.closeSettings = closeSettings;
+
+        function saveSettings() {
+            const keys = [];
+            for (let i = 1; i <= 4; i++) {
+                const val = document.getElementById(`key-${i}`).value;
+                if (val) keys.push(val);
+            }
+            localStorage.setItem('ai_keys', JSON.stringify(keys));
+            closeSettings();
+        }
+        window.saveSettings = saveSettings;
+
+        function getApiKey() {
+            const userKeys = JSON.parse(localStorage.getItem('ai_keys') || '[]');
+            if (userKeys.length > 0) {
+                // Rotate through user keys
+                const index = requests % userKeys.length;
+                return userKeys[index];
+            }
+            return process.env.GEMINI_API_KEY;
+        }
+
+        async function getAIResponse(prompt) {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                return "Error: No API key found. Please add one in the settings (gear icon) to continue.";
+            }
+
+            const ai = new GoogleGenAI({ apiKey });
+
+            try {
+                const response = await ai.models.generateContent({
+                    model: "gemini-3-flash-preview",
+                    contents: [{ parts: [{ text: prompt }] }]
+                });
+                
+                if (!response || !response.text) {
+                    throw new Error("Empty response from AI");
+                }
+                
+                return response.text;
+            } catch (e) {
+                console.error("AI Error:", e);
+                if (e.message?.includes("API_KEY_INVALID")) {
+                    return "Error: The API key provided is invalid. Please check your settings.";
+                }
+                return "Sorry, I'm having trouble connecting to my brain right now. Please check your internet or API key settings.";
+            }
+        }
 
         function addMessage(text, isUser) {
             const msg = document.createElement('div');
@@ -149,17 +311,27 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        btn.onclick = () => {
+        btn.onclick = async () => {
             const text = input.value;
             if (!text) return;
+
+            if (requests >= MAX_REQUESTS) {
+                addMessage("You've reached your limit of 40 requests. Please try again later.", false);
+                return;
+            }
+
             addMessage(text, true);
             input.value = '';
             
             typing.style.display = 'block';
-            setTimeout(() => {
-                typing.style.display = 'none';
-                addMessage("I'm your gravityOS companion. I can help you navigate the system, suggest games, or explain how the proxy works!", false);
-            }, 1500);
+            
+            const response = await getAIResponse(text);
+            
+            typing.style.display = 'none';
+            addMessage(response, false);
+            
+            requests++;
+            updateReqCount();
         };
 
         input.onkeypress = (e) => {
