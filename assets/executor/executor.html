@@ -99,7 +99,9 @@
         <div class="status" id="status">Ready.</div>
     </div>
 
-    <script>
+    <script type="module">
+        import { executeCode } from './executor.js';
+
         (function() {
             const savedTheme = localStorage.getItem('gravity_theme');
             if (savedTheme) {
@@ -123,31 +125,49 @@
             }
         });
 
-        function execute() {
-            const code = document.getElementById('code-area').value;
+        let currentFileBuffer = null;
+
+        window.execute = async function() {
+            const codeArea = document.getElementById('code-area');
             const status = document.getElementById('status');
+            const code = codeArea.value;
             
-            if (!code.trim()) {
-                status.innerText = "Error: No code provided.";
+            if (!code.trim() && !currentFileBuffer) {
+                status.innerText = "Error: No code or file provided.";
                 return;
             }
 
-            status.innerText = "Executing in WASM sandbox...";
+            status.innerText = "Executing...";
             
-            // Simulated execution logic
-            setTimeout(() => {
-                status.innerText = "Execution complete. Output: [Simulated WASM Environment]";
-                console.log("Executing:", code);
-            }, 1000);
+            let result;
+            if (currentFileBuffer) {
+                result = await executeCode(currentFileBuffer, 'wasm');
+            } else {
+                // Try to detect if it's hex (WASM) or JS
+                const isHex = /^[0-9a-fA-F\s]+$/.test(code.trim()) && code.trim().length > 20;
+                result = await executeCode(code, isHex ? 'wasm' : 'js');
+            }
+
+            if (result.success) {
+                status.innerText = `Success!\n${result.logs ? 'Logs:\n' + result.logs + '\n' : ''}Result: ${result.result}`;
+            } else {
+                status.innerText = `Error: ${result.error}${result.logs ? '\nLogs:\n' + result.logs : ''}`;
+            }
         }
 
-        function handleFile(input) {
+        window.handleFile = function(input) {
             const file = input.files[0];
             const status = document.getElementById('status');
+            const codeArea = document.getElementById('code-area');
             
             if (file) {
-                status.innerText = `File loaded: ${file.name} (${file.size} bytes). Ready to execute.`;
-                document.getElementById('code-area').value = `// Binary file: ${file.name}\n// Ready for WASM translation...`;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentFileBuffer = new Uint8Array(e.target.result);
+                    status.innerText = `File loaded: ${file.name} (${file.size} bytes). Ready to execute.`;
+                    codeArea.value = `// Binary file: ${file.name}\n// Ready for execution...`;
+                };
+                reader.readAsArrayBuffer(file);
             }
         }
     </script>
