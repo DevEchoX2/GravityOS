@@ -269,32 +269,6 @@
             return process.env.GEMINI_API_KEY;
         }
 
-        async function getAIResponse(prompt) {
-            try {
-                const response = await fetch('/api/ai', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt })
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error || "Failed to get AI response");
-                }
-                
-                return data.text;
-            } catch (e) {
-                console.error("AI Error:", e);
-                if (e.message.includes("GEMINI_API_KEY not found")) {
-                    return "Error: GEMINI_API_KEY is missing. Please add it to the 'Secrets' menu in AI Studio Settings.";
-                }
-                return "Sorry, I'm having trouble connecting to my brain right now. Please check your internet or server status.";
-            }
-        }
-
         function addMessage(text, isUser) {
             const msg = document.createElement('div');
             msg.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -317,13 +291,46 @@
             
             typing.style.display = 'block';
             
-            const response = await getAIResponse(text);
-            
-            typing.style.display = 'none';
-            addMessage(response, false);
-            
-            requests++;
-            updateReqCount();
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: text })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || "Failed to get AI response");
+                }
+
+                typing.style.display = 'none';
+                
+                // Create a new message bubble for the stream
+                const msg = document.createElement('div');
+                msg.className = 'message ai-message';
+                container.appendChild(msg);
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+                    msg.innerText = fullText;
+                    container.scrollTop = container.scrollHeight;
+                }
+                
+                requests++;
+                updateReqCount();
+            } catch (e) {
+                typing.style.display = 'none';
+                console.error("AI Error:", e);
+                addMessage("Sorry, I'm having trouble connecting to my brain right now.", false);
+            }
         };
 
         input.onkeydown = (e) => {
