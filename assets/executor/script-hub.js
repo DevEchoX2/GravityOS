@@ -1,23 +1,24 @@
 export const ScriptHub = {
     Blooket: {
-        "Get All Blooks": `// Blooket Utility: Unlock all blooks (Client-side visual)
-(function() {
-    const state = Object.values(document.querySelector('#app > div > div'))[1].children[0]._owner.stateNode.state;
-    state.unlocks = ["All"];
-    console.log("Blooks unlocked visually!");
-})();`,
-        "Auto Answer": `// Blooket Utility: Auto Answer simulation
-console.log("Auto-answer script initialized. Searching for question elements...");
-// Logic would go here if running on blooket.com`
+        "Global Hack (glixzzy)": {
+            url: "https://dashboard.blooket.com/play",
+            code: "fetch('https://raw.githubusercontent.com/glixzzy/blooket-hack/main/global/global.js').then(r=>r.text()).then(eval)"
+        },
+        "All Blooks (Client-side)": {
+            url: "https://dashboard.blooket.com/blooks",
+            code: "fetch('https://raw.githubusercontent.com/glixzzy/blooket-hack/main/blooks/getAllBlooks.js').then(r=>r.text()).then(eval)"
+        }
     },
     Kahoot: {
-        "Auto Answer": `// Kahoot Utility: Auto Answer
-console.log("Kahoot solver active. Waiting for PIN...");`,
-        "Spam Bots": `// Kahoot Utility: Bot simulation
-console.log("Bot flooder ready. Target: Kahoot Game");`
+        "Kahoot Winner (theusaf)": {
+            url: "https://kahoot.it",
+            code: "fetch('https://raw.githubusercontent.com/theusaf/kahoot-winner/main/winner.js').then(r=>r.text()).then(eval)"
+        }
     },
     Edpuzzle: {
-        "Skip Video": `// Edpuzzle Utility: Skip
-console.log("Edpuzzle skipper ready. Use on edpuzzle.com/assignments/...");`
+        "Edpuzzle Master": {
+            url: "https://edpuzzle.com",
+            code: "fetch('https://raw.githubusercontent.com/0x00000000000000000000000000000000/edpuzzle-master/master/edpuzzle-master.js').then(r=>r.text()).then(eval)"
+        }
     }
 };
