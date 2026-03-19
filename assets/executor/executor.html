@@ -123,6 +123,7 @@
             const codeArea = document.getElementById('code-area');
             const status = document.getElementById('status');
             const langSelect = document.getElementById('lang-select');
+            const hubSelect = document.getElementById('hub-select');
             const code = codeArea.value;
             
             if (!code.trim() && !currentFileBuffer) {
@@ -141,21 +142,19 @@
             if (currentFileBuffer) {
                 result = await executeCode(currentFileBuffer, 'wasm', onLog);
             } else {
-                const hubSelect = document.getElementById('hub-select');
+                // Check if we should use the hub shortcut (to get the URL opening logic)
                 const hubValue = hubSelect.value;
+                let finalCode = code;
                 
-                // If the code in the area matches the hub item's code, use the hub shortcut
-                // This ensures the target URL is opened
                 if (hubValue) {
                     const [cat, name] = hubValue.split(':');
-                    if (ScriptHub[cat][name].code === code) {
-                        result = await executeCode(`hub:${hubValue}`, langSelect.value, onLog);
-                    } else {
-                        result = await executeCode(code, langSelect.value, onLog);
+                    const item = ScriptHub[cat]?.[name];
+                    if (item && item.code.trim() === code.trim()) {
+                        finalCode = `hub:${hubValue}`;
                     }
-                } else {
-                    result = await executeCode(code, langSelect.value, onLog);
                 }
+                
+                result = await executeCode(finalCode, langSelect.value, onLog);
             }
 
             if (result.success) {
