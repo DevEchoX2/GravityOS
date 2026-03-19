@@ -95,6 +95,10 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`gravityOS running on http://0.0.0.0:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    const hasEnvKeys = !!process.env.GEMINI_API_KEY;
+    const hasHardcodedKeys = HARDCODED_KEYS.length > 0;
+    console.log(`Keys available: Env=${hasEnvKeys}, Hardcoded=${hasHardcodedKeys}`);
   });
 }
 
