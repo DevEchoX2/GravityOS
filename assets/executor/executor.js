@@ -14,7 +14,14 @@ export async function executeCode(code, type = 'js') {
             // Check if it's a ScriptHub shortcut
             if (code.startsWith('hub:')) {
                 const [_, category, name] = code.split(':');
-                code = ScriptHub[category]?.[name] || code;
+                const hubItem = ScriptHub[category]?.[name];
+                if (hubItem) {
+                    if (hubItem.url) {
+                        logFn(`Opening ${hubItem.url}...`);
+                        window.open(hubItem.url, '_blank');
+                    }
+                    code = hubItem.code;
+                }
             }
 
             const result = eval(code);
