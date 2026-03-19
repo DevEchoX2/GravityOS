@@ -37,20 +37,47 @@ export async function executeCode(code, type = 'js') {
             const L = lauxlib.luaL_newstate();
             lualib.luaL_openlibs(L);
 
-            // Register Roblox API
-            Object.entries(robloxEnv).forEach(([key, value]) => {
-                if (typeof value === 'function') {
-                    lua.lua_register(L, key, (L) => {
+            const pushValue = (val) => {
+                if (typeof val === 'function') {
+                    lua.lua_pushjsfunction(L, (L) => {
                         const n = lua.lua_gettop(L);
                         const args = [];
-                        for (let i = 1; i <= n; i++) args.push(lua.lua_tostring(L, i));
-                        const res = value(...args);
+                        for (let i = 1; i <= n; i++) {
+                            const type = lua.lua_type(L, i);
+                            if (type === lua.LUA_TSTRING) args.push(fengari.to_jsstring(lua.lua_tostring(L, i)));
+                            else if (type === lua.LUA_TNUMBER) args.push(lua.lua_tonumber(L, i));
+                            else if (type === lua.LUA_TBOOLEAN) args.push(lua.lua_toboolean(L, i));
+                            else args.push(null);
+                        }
+                        const res = val(...args);
+                        if (res !== undefined) {
+                            pushValue(res);
+                            return 1;
+                        }
                         return 0;
                     });
+                } else if (typeof val === 'object' && val !== null) {
+                    lua.lua_newtable(L);
+                    Object.entries(val).forEach(([k, v]) => {
+                        lua.lua_pushstring(L, fengari.to_luastring(k));
+                        pushValue(v);
+                        lua.lua_settable(L, -3);
+                    });
+                } else if (typeof val === 'string') {
+                    lua.lua_pushstring(L, fengari.to_luastring(val));
+                } else if (typeof val === 'number') {
+                    lua.lua_pushnumber(L, val);
+                } else if (typeof val === 'boolean') {
+                    lua.lua_pushboolean(L, val);
                 } else {
-                    // Simple object registration (simplified)
-                    window[`__lua_${key}`] = value;
+                    lua.lua_pushnil(L);
                 }
+            };
+
+            // Register Roblox API
+            Object.entries(robloxEnv).forEach(([key, value]) => {
+                pushValue(value);
+                lua.lua_setglobal(L, fengari.to_luastring(key));
             });
 
             const status = lauxlib.luaL_dostring(L, fengari.to_luastring(code));
