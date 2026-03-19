@@ -1,21 +1,12 @@
 {
   "name": "gravityos",
   "version": "1.0.0",
-  "description": "gravityOS web proxy",
-  "main": "server.js",
+  "description": "gravityOS static web application",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "tsx server.js",
-    "build": "vite build",
+    "dev": "npx -y http-server -p 3000",
+    "build": "mkdir -p dist && cp -r assets index.html sw.js dist/ 2>/dev/null || true",
     "lint": "echo 'No lint step required'"
   },
-  "dependencies": {
-    "@google/genai": "^1.46.0",
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "tsx": "^4.21.0",
-    "vite": "^5.0.0"
-  }
+  "dependencies": {}
 }
