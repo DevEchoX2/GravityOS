@@ -35,9 +35,17 @@
                 </optgroup>
             </select>
             <button onclick="execute()">Run Code</button>
+            <button class="secondary" onclick="createBookmarklet()">Bookmarklet</button>
             <button class="secondary" onclick="copyCode()">Copy Code</button>
             <button class="secondary" onclick="document.getElementById('file-input').click()">Upload File</button>
             <input type="file" id="file-input" class="file-input" onchange="handleFile(this)">
+        </div>
+
+        <div id="bookmarklet-tip" style="display:none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 15px; font-size: 0.85rem; line-height: 1.4;">
+            <strong>School Mode (Console Blocked?):</strong><br>
+            1. Drag this link to your bookmarks bar: <a id="bm-link" href="#" style="color: #60a5fa; font-weight: bold; text-decoration: underline;">[EXE Loader]</a><br>
+            2. Go to the game website (Blooket/Kahoot).<br>
+            3. Click the bookmark you just made.
         </div>
         
         <div class="status" id="status">Ready.</div>
@@ -48,12 +56,28 @@
         import { ScriptHub } from './script-hub.js';
 
         window.loadFromHub = function(select) {
-            if (!select.value) return;
+            if (!select.value) {
+                document.getElementById('bookmarklet-tip').style.display = 'none';
+                return;
+            }
             const [cat, name] = select.value.split(':');
             const item = ScriptHub[cat][name];
             document.getElementById('code-area').value = item.code;
             document.getElementById('lang-select').value = 'js';
             document.getElementById('status').innerText = `Loaded ${name}. Click "Run Code" to open ${item.url} and execute loader.`;
+            
+            // Show bookmarklet tip for school mode
+            createBookmarklet();
+            document.getElementById('bookmarklet-tip').style.display = 'block';
+        };
+
+        window.createBookmarklet = function() {
+            const code = document.getElementById('code-area').value;
+            const bmLink = document.getElementById('bm-link');
+            const encoded = encodeURIComponent(code);
+            bmLink.href = `javascript:(function(){${encoded}})();`;
+            document.getElementById('bookmarklet-tip').style.display = 'block';
+            document.getElementById('status').innerText = "Bookmarklet updated! Drag the link to your bookmarks bar.";
         };
 
         window.copyCode = function() {
