@@ -299,8 +299,20 @@
                 });
 
                 if (!response.ok) {
-                    const data = await response.json();
-                    throw new Error(data.error || "Failed to get AI response");
+                    let errorMsg = "Failed to get AI response";
+                    try {
+                        const data = await response.json();
+                        errorMsg = data.error || errorMsg;
+                    } catch (jsonErr) {
+                        // If response is not JSON, it's likely an HTML error page
+                        const text = await response.text();
+                        if (text.includes("The page c")) {
+                            errorMsg = "Server is currently unavailable or restarting. Please wait a moment.";
+                        } else {
+                            errorMsg = "Server error: " + response.status;
+                        }
+                    }
+                    throw new Error(errorMsg);
                 }
 
                 typing.style.display = 'none';
