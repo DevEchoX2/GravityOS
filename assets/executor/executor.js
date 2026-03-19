@@ -24,10 +24,14 @@ export async function executeCode(code, type = 'js') {
                 }
             }
 
-            const result = eval(code);
+            let result = eval(code);
+            if (result instanceof Promise) {
+                result = await result;
+            }
+            
             return {
                 success: true,
-                result: result !== undefined ? String(result) : 'undefined',
+                result: result !== undefined ? (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result)) : 'undefined',
                 logs: logs.join('\n')
             };
         } catch (err) {
