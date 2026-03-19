@@ -91,6 +91,24 @@
         <textarea id="code-area" placeholder="// Paste your code or WASM hex here..."></textarea>
         
         <div class="controls">
+            <select id="lang-select" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 0 15px;">
+                <option value="js">JavaScript</option>
+                <option value="lua">Lua (Roblox)</option>
+                <option value="wasm">WASM (Hex)</option>
+            </select>
+            <select id="hub-select" onchange="loadFromHub(this)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 0 15px;">
+                <option value="">Script Hub...</option>
+                <optgroup label="Blooket">
+                    <option value="Blooket:Get All Blooks">Get All Blooks</option>
+                    <option value="Blooket:Auto Answer">Auto Answer</option>
+                </optgroup>
+                <optgroup label="Kahoot">
+                    <option value="Kahoot:Auto Answer">Auto Answer</option>
+                </optgroup>
+                <optgroup label="Edpuzzle">
+                    <option value="Edpuzzle:Skip Video">Skip Video</option>
+                </optgroup>
+            </select>
             <button onclick="execute()">Run Code</button>
             <button class="secondary" onclick="document.getElementById('file-input').click()">Upload File</button>
             <input type="file" id="file-input" class="file-input" onchange="handleFile(this)">
@@ -101,6 +119,14 @@
 
     <script type="module">
         import { executeCode } from './executor.js';
+        import { ScriptHub } from './script-hub.js';
+
+        window.loadFromHub = function(select) {
+            if (!select.value) return;
+            const [cat, name] = select.value.split(':');
+            document.getElementById('code-area').value = ScriptHub[cat][name];
+            document.getElementById('lang-select').value = 'js';
+        };
 
         (function() {
             const savedTheme = localStorage.getItem('gravity_theme');
@@ -130,6 +156,7 @@
         window.execute = async function() {
             const codeArea = document.getElementById('code-area');
             const status = document.getElementById('status');
+            const langSelect = document.getElementById('lang-select');
             const code = codeArea.value;
             
             if (!code.trim() && !currentFileBuffer) {
@@ -143,9 +170,7 @@
             if (currentFileBuffer) {
                 result = await executeCode(currentFileBuffer, 'wasm');
             } else {
-                // Try to detect if it's hex (WASM) or JS
-                const isHex = /^[0-9a-fA-F\s]+$/.test(code.trim()) && code.trim().length > 20;
-                result = await executeCode(code, isHex ? 'wasm' : 'js');
+                result = await executeCode(code, langSelect.value);
             }
 
             if (result.success) {
