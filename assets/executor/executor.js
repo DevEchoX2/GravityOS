@@ -1,11 +1,12 @@
 import { createRobloxEnv } from './roblox-api.js';
 import { ScriptHub } from './script-hub.js';
 
-export async function executeCode(code, type = 'js') {
+export async function executeCode(code, type = 'js', onLog = null) {
     const logs = [];
     const logFn = (...args) => {
         const msg = args.map(a => String(a)).join(' ');
         logs.push(msg);
+        if (onLog) onLog(msg);
         console.log(msg);
     };
 
