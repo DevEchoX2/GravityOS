@@ -24,6 +24,10 @@ async function startServer() {
     }
 
     const keys = rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    if (keys.length === 0) {
+      return res.status(500).json({ error: "GEMINI_API_KEY is empty or invalid. Please add your keys separated by commas." });
+    }
+    
     const apiKey = keys[Math.floor(Math.random() * keys.length)];
 
     try {
@@ -37,8 +41,13 @@ async function startServer() {
       res.setHeader('Transfer-Encoding', 'chunked');
 
       for await (const chunk of result) {
-        if (chunk.text) {
-          res.write(chunk.text);
+        try {
+          const text = chunk.text;
+          if (text) {
+            res.write(text);
+          }
+        } catch (e) {
+          console.warn("Chunk error (likely safety filter):", e);
         }
       }
       res.end();
