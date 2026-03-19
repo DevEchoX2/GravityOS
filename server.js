@@ -14,33 +14,41 @@ async function startServer() {
 
   app.use(express.json());
 
-  // API Route for AI Assistant
+  // API Route for AI Assistant (Streaming)
   app.post('/api/ai', async (req, res) => {
     const { prompt } = req.body;
     const rawKeys = process.env.GEMINI_API_KEY;
 
     if (!rawKeys) {
-      return res.status(500).json({ error: "GEMINI_API_KEY not found in server environment. Please add it to AI Studio Secrets." });
+      return res.status(500).json({ error: "GEMINI_API_KEY not found in server environment." });
     }
 
-    // Split keys by comma and pick one at random
     const keys = rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 0);
-    if (keys.length === 0) {
-      return res.status(500).json({ error: "No valid API keys found in GEMINI_API_KEY environment variable." });
-    }
-    
     const apiKey = keys[Math.floor(Math.random() * keys.length)];
 
     try {
       const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
+      const result = await ai.models.generateContentStream({
         model: "gemini-3-flash-preview",
         contents: [{ parts: [{ text: prompt }] }]
       });
-      res.json({ text: response.text });
+
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Transfer-Encoding', 'chunked');
+
+      for await (const chunk of result) {
+        if (chunk.text) {
+          res.write(chunk.text);
+        }
+      }
+      res.end();
     } catch (error) {
       console.error("AI Server Error:", error);
-      res.status(500).json({ error: "Failed to get AI response. Check your API key and network connection." });
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Failed to get AI response." });
+      } else {
+        res.end();
+      }
     }
   });
 
