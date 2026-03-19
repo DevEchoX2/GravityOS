@@ -3,82 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Executor - gravityOS</title>
-    <style>
-        body {
-            padding: 40px;
-            background: transparent;
-            color: white;
-            font-family: 'Inter', -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            height: 100vh;
-            margin: 0;
-            box-sizing: border-box;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            flex: 1;
-        }
-        h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        textarea {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #00ff00;
-            font-family: 'JetBrains Mono', monospace;
-            padding: 20px;
-            outline: none;
-            resize: none;
-            font-size: 14px;
-        }
-        .controls {
-            display: flex;
-            gap: 15px;
-        }
-        button {
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: none;
-            background: #3b82f6;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        button:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-        button.secondary {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        button.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .file-input {
-            display: none;
-        }
-        .status {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            font-family: monospace;
-        }
-    </style>
+    <link rel="stylesheet" href="executor.css">
 </head>
 <body>
     <div class="container">
@@ -91,12 +16,12 @@
         <textarea id="code-area" placeholder="// Paste your code or WASM hex here..."></textarea>
         
         <div class="controls">
-            <select id="lang-select" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 0 15px;">
+            <select id="lang-select">
                 <option value="js">JavaScript</option>
                 <option value="lua">Lua (Roblox)</option>
                 <option value="wasm">WASM (Hex)</option>
             </select>
-            <select id="hub-select" onchange="loadFromHub(this)" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 0 15px;">
+            <select id="hub-select" onchange="loadFromHub(this)">
                 <option value="">Script Hub...</option>
                 <optgroup label="Blooket">
                     <option value="Blooket:Global Hack (glixzzy)">Global Hack (glixzzy)</option>
@@ -142,8 +67,10 @@
             if (savedTheme) {
                 try {
                     const theme = JSON.parse(savedTheme);
-                    for (const [key, value] of Object.entries(theme.colors)) {
-                        document.documentElement.style.setProperty(`--${key}`, value);
+                    if (theme && theme.colors) {
+                        for (const [key, value] of Object.entries(theme.colors)) {
+                            document.documentElement.style.setProperty(`--${key}`, value);
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to apply initial theme to executor:', e);
@@ -154,8 +81,10 @@
         window.addEventListener('message', (event) => {
             if (event.data.type === 'themeChange') {
                 const colors = event.data.theme;
-                for (const [key, value] of Object.entries(colors)) {
-                    document.documentElement.style.setProperty(`--${key}`, value);
+                if (colors) {
+                    for (const [key, value] of Object.entries(colors)) {
+                        document.documentElement.style.setProperty(`--${key}`, value);
+                    }
                 }
             }
         });
