@@ -1,5 +1,76 @@
 let tabs = [];
 let activeTabId = null;
+let scramjetCtrl = null;
+
+let gravityConfig = {
+    engine: localStorage.getItem('gravity_engine') || 'uv',
+    transport: localStorage.getItem('gravity_transport') || 'epoxy',
+    wisp: localStorage.getItem('gravity_wisp') || 'wss://wisp.rhw.one/'
+};
+
+async function initProxyEngines() {
+    if (window.BareMux) {
+        try {
+            const conn = new BareMux.BareMuxConnection("/ixlmath/baremux/worker.js");
+            const transportPath = gravityConfig.transport === 'epoxy' 
+                ? "/ixlmath/epoxy/index.mjs" 
+                : "/ixlmath/libcurl/index.mjs";
+                
+            await conn.setTransport(transportPath, [{ websocket: gravityConfig.wisp }]);
+            console.log(`BareMux initialized with ${gravityConfig.transport}`);
+        } catch (e) {
+            console.error("BareMux init failed:", e);
+        }
+    }
+
+    if (gravityConfig.engine === 'scramjet' && window.$scramjetLoadController) {
+        try {
+            const { ScramjetController } = window.$scramjetLoadController();
+            scramjetCtrl = new ScramjetController({
+                files: { 
+                    all: "/ixlmath/scram/scramjet.all.js", 
+                    wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
+                    sync: "/ixlmath/scram/scramjet.sync.js" 
+                },
+                prefix: "/ixlmath/go/" 
+            });
+            scramjetCtrl.init();
+            console.log("Scramjet initialized");
+        } catch (e) {
+            console.error("Scramjet init failed:", e);
+        }
+    }
+}
+
+function openSettings() {
+    document.getElementById('browser-menu').style.display = 'none';
+    document.getElementById('setting-engine').value = gravityConfig.engine;
+    document.getElementById('setting-transport').value = gravityConfig.transport;
+    document.getElementById('setting-wisp').value = gravityConfig.wisp;
+    document.getElementById('settings-modal').style.display = 'block';
+}
+
+function closeSettings() {
+    document.getElementById('settings-modal').style.display = 'none';
+}
+
+function saveSettings() {
+    gravityConfig.engine = document.getElementById('setting-engine').value;
+    gravityConfig.transport = document.getElementById('setting-transport').value;
+    gravityConfig.wisp = document.getElementById('setting-wisp').value;
+    
+    localStorage.setItem('gravity_engine', gravityConfig.engine);
+    localStorage.setItem('gravity_transport', gravityConfig.transport);
+    localStorage.setItem('gravity_wisp', gravityConfig.wisp);
+    
+    closeSettings();
+    initProxyEngines();
+    
+    const url = document.getElementById('url-bar').value;
+    if(url && !url.includes('newtab.html')) {
+        launchProxy();
+    }
+}
 
 function createNewTab(url = 'newtab.html') {
     const id = Date.now().toString();
@@ -88,7 +159,7 @@ function launchProxy() {
             try {
                 viewport.contentWindow.eval(decodeURIComponent(code));
             } catch (e) {
-                console.error('Bookmarklet error:', e);
+                console.error(e);
             }
         }
         return;
@@ -106,9 +177,20 @@ function launchProxy() {
         targetUrl = (engines[engine] || engines.google) + encodeURIComponent(url);
     }
     
+    let encodedUrl = targetUrl;
+    
+    if (gravityConfig.engine === 'uv' && window.__uv$config) {
+        encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
+    } else if (gravityConfig.engine === 'scramjet' && scramjetCtrl) {
+        encodedUrl = scramjetCtrl.encodeUrl(targetUrl);
+    } else if (gravityConfig.engine === 'scramjet' && !scramjetCtrl) {
+        alert("Scramjet is still initializing, please try again in a second.");
+        return;
+    }
+    
     const viewport = document.getElementById(`viewport-${activeTabId}`);
     if (viewport) {
-        viewport.src = targetUrl;
+        viewport.src = encodedUrl;
         document.querySelector(`#tab-${activeTabId} .tab-title`).innerText = 'Loading...';
     }
 }
@@ -157,4 +239,5 @@ document.getElementById('url-bar').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') launchProxy();
 });
 
+initProxyEngines();
 createNewTab();
