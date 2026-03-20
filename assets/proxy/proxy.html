@@ -174,6 +174,52 @@
             cursor: pointer;
             opacity: 0.6;
         }
+
+        #settings-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 2000;
+            width: 300px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            color: #fff;
+        }
+        .settings-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .settings-group label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+        .settings-group select, .settings-group input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            outline: none;
+            font-size: 13px;
+        }
+        .settings-btn {
+            background: var(--browser-accent);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -209,77 +255,44 @@
             </div>
         </div>
     </div>
-    <div id="viewports-container" style="flex:1; position:relative;">
-    </div>
+    <div id="viewports-container" style="flex:1; position:relative;"></div>
 
     <div id="browser-menu" style="display:none; position:absolute; right:15px; top:95px; background:rgba(20, 20, 20, 0.95); backdrop-filter:blur(20px); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; padding:8px; z-index:1000; width:200px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
         <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="window.parent.loadPage('extensions')">Manage Extensions</div>
         <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="alert('EXE support coming soon!')">Run .EXE</div>
+        <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'" onclick="openSettings()">Proxy Settings</div>
         <div style="height:1px; background:rgba(255,255,255,0.05); margin:5px 0;"></div>
         <div style="padding:10px 15px; cursor:pointer; font-size:13px; border-radius:8px; color:#ff4444;" onmouseover="this.style.background='rgba(255,0,0,0.05)'" onmouseout="this.style.background='transparent'" onclick="location.reload()">Clear Cache</div>
     </div>
 
+    <div id="settings-modal">
+        <h3 style="margin-top:0; margin-bottom:15px; font-weight:600;">Proxy Config</h3>
+        <div class="settings-group">
+            <label>Engine</label>
+            <select id="setting-engine">
+                <option value="uv">Ultraviolet</option>
+                <option value="scramjet">Scramjet (IXL)</option>
+            </select>
+        </div>
+        <div class="settings-group">
+            <label>BareMux Transport</label>
+            <select id="setting-transport">
+                <option value="epoxy">Epoxy</option>
+                <option value="libcurl">Libcurl</option>
+            </select>
+        </div>
+        <div class="settings-group">
+            <label>Wisp Server (WSS)</label>
+            <input type="text" id="setting-wisp" value="wss://wisp.rhw.one/">
+        </div>
+        <button class="settings-btn" onclick="saveSettings()">Save & Restart Engines</button>
+        <button class="settings-btn" style="background:transparent; border:1px solid rgba(255,255,255,0.1); margin-top:5px;" onclick="closeSettings()">Cancel</button>
+    </div>
+
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
-    <script src="/baremux/index.js"></script>
-    <script>
-        // Load theme from localStorage on startup
-        (function() {
-            const savedTheme = localStorage.getItem('gravity_theme');
-            if (savedTheme) {
-                try {
-                    const theme = JSON.parse(savedTheme);
-                    const colors = theme.colors;
-                    for (const key in colors) {
-                        document.documentElement.style.setProperty(`--${key}`, colors[key]);
-                    }
-                    document.body.style.backgroundColor = colors['bg-color'];
-                    document.body.style.color = colors['text-color'];
-                    
-                    const header = document.getElementById('browser-header');
-                    const navBar = document.getElementById('nav-bar');
-                    const tabBar = document.querySelector('.tab-bar');
-                    if (header) header.style.backgroundColor = colors['sidebar-bg'];
-                    if (navBar) navBar.style.backgroundColor = colors['sidebar-bg'];
-                    if (tabBar) tabBar.style.backgroundColor = colors['sidebar-bg'];
-                    
-                    const urlBar = document.getElementById('url-bar');
-                    if (urlBar) {
-                        urlBar.style.backgroundColor = colors['card-bg'];
-                        urlBar.style.color = colors['text-color'];
-                        urlBar.style.borderColor = colors['border-color'];
-                    }
-                } catch (e) {
-                    console.error('Failed to apply initial theme to proxy:', e);
-                }
-            }
-        })();
-
-        window.addEventListener('message', (event) => {
-            if (event.data.type === 'themeChange') {
-                const theme = event.data.theme;
-                for (const key in theme) {
-                    document.documentElement.style.setProperty(`--${key}`, theme[key]);
-                }
-                document.body.style.backgroundColor = theme['bg-color'];
-                document.body.style.color = theme['text-color'];
-                
-                const header = document.getElementById('browser-header');
-                const navBar = document.getElementById('nav-bar');
-                const tabBar = document.querySelector('.tab-bar');
-                if (header) header.style.backgroundColor = theme['sidebar-bg'];
-                if (navBar) navBar.style.backgroundColor = theme['sidebar-bg'];
-                if (tabBar) tabBar.style.backgroundColor = theme['sidebar-bg'];
-                
-                const urlBar = document.getElementById('url-bar');
-                if (urlBar) {
-                    urlBar.style.backgroundColor = theme['card-bg'];
-                    urlBar.style.color = theme['text-color'];
-                    urlBar.style.borderColor = theme['border-color'];
-                }
-            }
-        });
-    </script>
+    <script src="/ixlmath/baremux/index.js"></script>
+    <script src="/ixlmath/scram/scramjet.all.js"></script>
     <script src="proxy.js"></script>
 </body>
 </html>
