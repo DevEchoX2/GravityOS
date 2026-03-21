@@ -298,6 +298,7 @@
         let tabs = [];
         let activeTabId = null;
         let enginesReady = false;
+        let scramjetCtrl = null;
 
         let gravityConfig = {
             engine: localStorage.getItem('gravity_engine') || 'uv',
@@ -317,7 +318,7 @@
                     }
                 }
             } catch (e) {
-                console.error(e);
+                console.error("SW Registration Error:", e);
             }
 
             if (window.BareMux) {
@@ -329,12 +330,28 @@
                         
                     await conn.setTransport(transportPath, [{ websocket: gravityConfig.wisp }]);
                 } catch (e) {
-                    console.error(e);
+                    console.error("BareMux Error:", e);
                 }
             }
 
-            enginesReady = true;
-            checkPendingLoad();
+            if (gravityConfig.engine === 'scramjet') {
+                const attemptScramjetInit = async (retries = 20) => {
+                    if (window.$scramjetLoadController || window.ScramjetController) {
+                        enginesReady = true;
+                        checkPendingLoad();
+                    } else if (retries > 0) {
+                        setTimeout(() => attemptScramjetInit(retries - 1), 250);
+                    } else {
+                        console.error("Scramjet script failed to load entirely.");
+                        enginesReady = true; 
+                        checkPendingLoad();
+                    }
+                };
+                attemptScramjetInit();
+            } else {
+                enginesReady = true;
+                checkPendingLoad();
+            }
         }
 
         function checkPendingLoad() {
