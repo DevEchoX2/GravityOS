@@ -1,7 +1,6 @@
 let tabs = [];
 let activeTabId = null;
 let scramjetCtrl = null;
-let enginesReady = false;
 
 let gravityConfig = {
     engine: localStorage.getItem('gravity_engine') || 'uv',
@@ -10,7 +9,6 @@ let gravityConfig = {
 };
 
 async function initProxyEngines() {
-    enginesReady = false;
     scramjetCtrl = null;
 
     if (window.BareMux) {
@@ -33,49 +31,35 @@ async function initProxyEngines() {
                     scope: __uv$config.prefix
                 });
             }
-            enginesReady = true;
         } catch (e) {
             console.error("UV SW registration failed:", e);
-            enginesReady = true; 
         }
     } 
     else if (gravityConfig.engine === 'scramjet') {
-        const attemptScramjetInit = async (retries = 10) => {
-            if (window.$scramjetLoadController) {
-                try {
-                    const { ScramjetController } = window.$scramjetLoadController();
-                    scramjetCtrl = new ScramjetController({
-                        files: { 
-                            all: "/ixlmath/scram/scramjet.all.js", 
-                            wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
-                            sync: "/ixlmath/scram/scramjet.sync.js" 
-                        },
-                        prefix: "/ixlmath/go/" 
-                    });
-                    
-                    if (typeof scramjetCtrl.init === 'function') {
-                        await scramjetCtrl.init();
-                    }
-                    
-                    if ('serviceWorker' in navigator) {
-                        await navigator.serviceWorker.register('/ixlmath/scram/sw.js', {
-                            scope: "/ixlmath/go/"
-                        });
-                    }
-                    
-                    enginesReady = true;
-                } catch (e) {
-                    console.error("Scramjet init failed:", e);
-                    enginesReady = true; 
-                }
-            } else if (retries > 0) {
-                setTimeout(() => attemptScramjetInit(retries - 1), 500);
-            } else {
-                console.error("Scramjet script failed to load entirely.");
-                enginesReady = true; 
+        try {
+            if ('serviceWorker' in navigator) {
+                await navigator.serviceWorker.register('/ixlmath/scram/sw.js', {
+                    scope: "/ixlmath/go/"
+                });
             }
-        };
-        attemptScramjetInit();
+
+            if (window.$scramjetLoadController) {
+                const { ScramjetController } = window.$scramjetLoadController();
+                scramjetCtrl = new ScramjetController({
+                    files: { 
+                        all: "/ixlmath/scram/scramjet.all.js", 
+                        wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
+                        sync: "/ixlmath/scram/scramjet.sync.js" 
+                    },
+                    prefix: "/ixlmath/go/" 
+                });
+                if (typeof scramjetCtrl.init === 'function') {
+                    scramjetCtrl.init();
+                }
+            }
+        } catch (e) {
+            console.error("Scramjet init failed:", e);
+        }
     }
 }
 
@@ -179,6 +163,16 @@ function updateTabTitle(id, iframe) {
     } catch (e) {}
 }
 
+function encodeScramjetUrl(url) {
+    if (scramjetCtrl && typeof scramjetCtrl.encodeUrl === 'function') {
+        return scramjetCtrl.encodeUrl(url);
+    }
+    if (window.$scramjet && typeof window.$scramjet.encodeUrl === 'function') {
+        return window.$scramjet.encodeUrl(url);
+    }
+    return "/ixlmath/go/" + btoa(url); 
+}
+
 function launchProxy() {
     const url = document.getElementById('url-bar').value;
     if (!url) return;
@@ -193,12 +187,6 @@ function launchProxy() {
         return;
     }
     
-    if (!enginesReady) {
-        document.querySelector(`#tab-${activeTabId} .tab-title`).innerText = 'Starting engine...';
-        setTimeout(launchProxy, 500);
-        return;
-    }
-
     let targetUrl = url;
     if (!url.startsWith('http')) {
         const engine = document.getElementById('search-engine').value;
@@ -215,11 +203,8 @@ function launchProxy() {
     
     if (gravityConfig.engine === 'uv' && window.__uv$config) {
         encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
-    } else if (gravityConfig.engine === 'scramjet' && scramjetCtrl) {
-        encodedUrl = scramjetCtrl.encodeUrl(targetUrl);
-    } else if (gravityConfig.engine === 'scramjet' && !scramjetCtrl) {
-        alert("Engine failed to load properly. Please check settings or reload.");
-        return;
+    } else if (gravityConfig.engine === 'scramjet') {
+        encodedUrl = encodeScramjetUrl(targetUrl);
     }
     
     const viewport = document.getElementById(`viewport-${activeTabId}`);
