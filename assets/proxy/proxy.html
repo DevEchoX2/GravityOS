@@ -139,17 +139,71 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            position: relative;
         }
         #url-bar {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff;
-            padding: 8px 15px;
+            padding: 8px 35px 8px 15px;
             border-radius: 8px;
             outline: none;
             font-size: 13px;
             transition: all 0.2s;
+        }
+        #bookmark-star {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        #bookmark-star:hover {
+            opacity: 1;
+        }
+        #bookmark-star.active {
+            color: #fbbf24;
+            opacity: 1;
+        }
+        #bookmarks-bar {
+            height: 30px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        #bookmarks-bar::-webkit-scrollbar { display: none; }
+        .bookmark-item {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .bookmark-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        .bookmark-item .remove-bookmark {
+            opacity: 0;
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        .bookmark-item:hover .remove-bookmark {
+            opacity: 0.5;
+        }
+        .bookmark-item .remove-bookmark:hover {
+            opacity: 1;
+            color: #ff4444;
         }
         #url-bar:focus {
             background: rgba(255, 255, 255, 0.1);
@@ -249,11 +303,15 @@
                     <option value="bing">Bing</option>
                 </select>
                 <input type="text" id="url-bar" placeholder="Search or enter address" autocomplete="off">
+                <div id="bookmark-star" title="Bookmark this page" onclick="toggleBookmark()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
             </div>
             <div class="menu-btn" onclick="toggleMenu()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
             </div>
         </div>
+        <div id="bookmarks-bar"></div>
     </div>
     <div id="viewports-container" style="flex:1; position:relative;"></div>
 
