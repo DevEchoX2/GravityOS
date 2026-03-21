@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--test-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gravityOS</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --sidebar-width: 70px;
+            --sidebar-expanded-width: 200px;
+            --accent-color: #3b82f6;
+            --text-color: #ffffff;
+            --sidebar-bg: #111111;
+            --transition-speed: 0.3s;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            transition: width var(--transition-speed) ease;
+            z-index: 1000;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        #sidebar:hover {
+            width: var(--sidebar-expanded-width);
+        }
+
+        .sidebar-item {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 23px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            color: var(--text-color);
+            opacity: 0.6;
+            text-decoration: none;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            opacity: 1;
+        }
+
+        .sidebar-item.active {
+            opacity: 1;
+            color: var(--accent-color);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 20px;
+        }
+
+        .sidebar-item svg {
+            min-width: 24px;
+            margin-right: 20px;
+        }
+
+        .sidebar-text {
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #sidebar:hover .sidebar-text {
+            opacity: 1;
+        }
+
+        #main-container {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            background: var(--bg-color);
+        }
+
+        .frame-wrapper {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .frame-wrapper.active {
+            display: block;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-bottom: 20px;
+        }
+
+        .maximize-btn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 2001;
+        }
+    </style>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    const root = document.documentElement;
+                    for (const [key, value] of Object.entries(theme.colors)) {
+                        root.style.setProperty(`--${key}`, value);
+                    }
+                } catch (e) {
+                    console.error('Failed to apply initial theme:', e);
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+    <nav id="sidebar">
+        <div class="sidebar-item active" onclick="loadPage('home')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="sidebar-text">Home</span>
+        </div>
+        <div class="sidebar-item" onclick="loadPage('games')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/></svg>
+            <span class="sidebar-text">Games</span>
+        </div>
+        <div class="sidebar-item" onclick="loadPage('apps')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span class="sidebar-text">Apps</span>
+        </div>
+        <div class="sidebar-item" onclick="loadPage('proxy')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span class="sidebar-text">Proxy</span>
+        </div>
+        <div class="sidebar-item" onclick="loadPage('ai')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect x="8" y="8" width="8" height="8" rx="2"/><path d="M16 12h4v4"/><path d="M12 16v4h4"/><path d="M8 12H4v-4"/></svg>
+            <span class="sidebar-text">AI</span>
+        </div>
+        <div class="sidebar-item" onclick="loadPage('extensions')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"/><path d="M11 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v10"/><path d="M16 11l2 2 4-4"/></svg>
+            <span class="sidebar-text">Extensions</span>
+        </div>
+        <div class="sidebar-item" onclick="loadPage('settings')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span class="sidebar-text">Settings</span>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="https://github.com/DevEchoX2/GravityOS" target="_blank" class="sidebar-item" title="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                <span class="sidebar-text">GitHub</span>
+            </a>
+            <a href="https://discord.com" target="_blank" class="sidebar-item" title="Discord">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8Z"/><path d="M10 12h.01"/><path d="M13 12h.01"/><path d="M7 12h.01"/></svg>
+                <span class="sidebar-text">Discord</span>
+            </a>
+        </div>
+    </nav>
+
+    <main id="main-container">
+        <div class="frame-wrapper active" id="home-wrapper">
+            <iframe id="home-frame" src="assets/home/index.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('home-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="games-wrapper">
+            <iframe id="games-frame" src="assets/games/g.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('games-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="apps-wrapper">
+            <iframe id="apps-frame" src="assets/apps/apps.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('apps-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="proxy-wrapper">
+            <iframe id="proxy-frame" src="assets/proxy/proxy.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('proxy-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="ai-wrapper">
+            <iframe id="ai-frame" src="assets/ai/ai.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('ai-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="extensions-wrapper">
+            <iframe id="extensions-frame" src="assets/extensions/extensions.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('extensions-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="settings-wrapper">
+            <iframe id="settings-frame" src="assets/settings/settings.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('settings-frame')">⛶</button>
+        </div>
+        <div class="frame-wrapper" id="executor-wrapper">
+            <iframe id="executor-frame" src="assets/executor/executor.html"></iframe>
+            <button class="maximize-btn" onclick="maximizeFrame('executor-frame')">⛶</button>
+        </div>
+    </main>
+
+    <script>
+        let currentTheme = null;
+
+        async function loadThemes() {
+            try {
+                const response = await fetch('assets/themes/themes.json');
+                const data = await response.json();
+                return data.themes;
+            } catch (e) {
+                console.error('Failed to load themes:', e);
+                return [];
+            }
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            const root = document.documentElement;
+            for (const [key, value] of Object.entries(theme.colors)) {
+                root.style.setProperty(`--${key}`, value);
+            }
+            
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.style.backgroundColor = theme.colors['sidebar-bg'];
+            }
+            
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.contentWindow.postMessage({ type: 'themeChange', theme: theme.colors }, '*');
+            });
+            
+            localStorage.setItem('gravity_theme', JSON.stringify(theme));
+        }
+
+        const savedTheme = localStorage.getItem('gravity_theme');
+        if (savedTheme) {
+            setTheme(JSON.parse(savedTheme));
+        }
+
+        window.addEventListener('message', async (event) => {
+            if (event.data.type === 'requestThemes') {
+                const themes = await loadThemes();
+                event.source.postMessage({ type: 'themesList', themes: themes }, '*');
+            } else if (event.data.type === 'setTheme') {
+                setTheme(event.data.theme);
+            } else if (event.data.type === 'cloak') {
+                cloak(event.data.mode);
+            }
+        });
+
+        function cloak(mode) {
+            const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            
+            if (mode === 'drive') {
+                link.href = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+                document.title = 'My Drive - Google Drive';
+            } else {
+                link.href = 'favicon.ico';
+                document.title = 'gravityOS';
+            }
+            document.getElementsByTagName('head')[0].appendChild(link);
+            localStorage.setItem('gravity_cloak', mode);
+        }
+
+        const savedCloak = localStorage.getItem('gravity_cloak');
+        if (savedCloak) cloak(savedCloak);
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
+        function loadPage(page) {
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.innerText.toLowerCase().includes(page.toLowerCase())) {
+                    item.classList.add('active');
+                }
+            });
+
+            document.querySelectorAll('.frame-wrapper').forEach(wrapper => {
+                wrapper.classList.remove('active');
+            });
+            const targetFrame = document.getElementById(page + '-frame');
+            if (targetFrame && targetFrame.parentElement) {
+                targetFrame.parentElement.classList.add('active');
+            }
+        }
+
+        function loadProxy(url) {
+            loadPage('proxy');
+            const proxyFrame = document.getElementById('proxy-frame');
+            proxyFrame.contentWindow.postMessage({ type: 'loadUrl', url: url }, '*');
+        }
+
+        function maximizeFrame(id) {
+            const frame = document.getElementById(id);
+            const isMaximized = frame.classList.contains('maximized');
+            
+            document.querySelectorAll('iframe').forEach(f => f.classList.remove('maximized'));
+            
+            if (!isMaximized) {
+                frame.classList.add('maximized');
+            }
+        }
+    </script>
+</body>
+</html>

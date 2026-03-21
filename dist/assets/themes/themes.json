@@ -1,0 +1,100 @@
+{
+  "themes": [
+    {
+      "id": "dark",
+      "name": "Midnight",
+      "colors": {
+        "bg-color": "#0a0a0a",
+        "sidebar-bg": "#111111",
+        "accent-color": "#3b82f6",
+        "text-color": "#ffffff",
+        "card-bg": "rgba(255, 255, 255, 0.05)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "ocean",
+      "name": "Ocean",
+      "colors": {
+        "bg-color": "#0f172a",
+        "sidebar-bg": "#1e293b",
+        "accent-color": "#0ea5e9",
+        "text-color": "#f8fafc",
+        "card-bg": "rgba(255, 255, 255, 0.05)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "dracula",
+      "name": "Dracula",
+      "colors": {
+        "bg-color": "#282a36",
+        "sidebar-bg": "#44475a",
+        "accent-color": "#bd93f9",
+        "text-color": "#f8f8f2",
+        "card-bg": "rgba(255, 255, 255, 0.05)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "rose-pine",
+      "name": "Rosé Pine",
+      "colors": {
+        "bg-color": "#191724",
+        "sidebar-bg": "#1f1d2e",
+        "accent-color": "#ebbcba",
+        "text-color": "#e0def4",
+        "card-bg": "rgba(255, 255, 255, 0.05)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "emerald",
+      "name": "Emerald",
+      "colors": {
+        "bg-color": "#064e3b",
+        "sidebar-bg": "#065f46",
+        "accent-color": "#10b981",
+        "text-color": "#ecfdf5",
+        "card-bg": "rgba(255, 255, 255, 0.1)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "sunset",
+      "name": "Sunset",
+      "colors": {
+        "bg-color": "#451a03",
+        "sidebar-bg": "#78350f",
+        "accent-color": "#f59e0b",
+        "text-color": "#fff7ed",
+        "card-bg": "rgba(255, 255, 255, 0.1)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "nord",
+      "name": "Nord",
+      "colors": {
+        "bg-color": "#2e3440",
+        "sidebar-bg": "#3b4252",
+        "accent-color": "#88c0d0",
+        "text-color": "#eceff4",
+        "card-bg": "rgba(255, 255, 255, 0.05)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    {
+      "id": "catppuccin",
+      "name": "Catppuccin",
+      "colors": {
+        "bg-color": "#1e1e2e",
+        "sidebar-bg": "#181825",
+        "accent-color": "#cba6f7",
+        "text-color": "#cdd6f4",
+        "card-bg": "rgba(255, 255, 255, 0.05)",
+        "border-color": "rgba(255, 255, 255, 0.1)"
+      }
+    }
+  ]
+}

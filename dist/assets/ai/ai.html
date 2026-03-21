@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Assistant - gravityOS</title>
+    <style>
+        :root {
+            --bg-color: transparent;
+            --text-color: white;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-color: #3b82f6;
+        }
+        body {
+            margin: 0;
+            padding: 40px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        #chat-container {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 25px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            padding: 14px 20px;
+            border-radius: 18px;
+            max-width: 75%;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: var(--accent-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .ai-message {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        #input-container {
+            display: flex;
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 8px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        #ai-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 12px 18px;
+            outline: none;
+            font-size: 14px;
+        }
+        #send-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        #send-btn:hover {
+            transform: scale(1.05);
+        }
+        .typing {
+            font-size: 12px;
+            opacity: 0.5;
+            margin-left: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="margin-bottom: 20px; font-weight: 700; letter-spacing: -0.02em;">AI Assistant</h1>
+    <div id="chat-container">
+        <div class="message ai-message">Hello! I'm your gravityOS assistant. How can I help you today?</div>
+    </div>
+    <div class="typing" id="typing-indicator">AI is thinking...</div>
+    <div id="input-container">
+        <input type="text" id="ai-input" placeholder="Ask me anything...">
+        <button id="send-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+    </div>
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('gravity_theme');
+            if (savedTheme) {
+                try {
+                    const theme = JSON.parse(savedTheme);
+                    for (const [key, value] of Object.entries(theme.colors)) {
+                        document.documentElement.style.setProperty(`--${key}`, value);
+                    }
+                } catch (e) {
+                    console.error('Failed to apply initial theme to ai:', e);
+                }
+            }
+        })();
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                const colors = event.data.theme;
+                for (const [key, value] of Object.entries(colors)) {
+                    document.documentElement.style.setProperty(`--${key}`, value);
+                }
+            }
+        });
+
+        const input = document.getElementById('ai-input');
+        const btn = document.getElementById('send-btn');
+        const container = document.getElementById('chat-container');
+        const typing = document.getElementById('typing-indicator');
+
+        function addMessage(text, isUser) {
+            const msg = document.createElement('div');
+            msg.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            msg.innerText = text;
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        btn.onclick = () => {
+            const text = input.value;
+            if (!text) return;
+            addMessage(text, true);
+            input.value = '';
+            
+            typing.style.display = 'block';
+            setTimeout(() => {
+                typing.style.display = 'none';
+                addMessage("I'm your gravityOS companion. I can help you navigate the system, suggest games, or explain how the proxy works!", false);
+            }, 1500);
+        };
+
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') btn.onclick();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Extensions - gravityOS</title>
+    <style>
+        :root {
+            --bg-color: transparent;
+            --text-color: white;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent-color: #3b82f6;
+        }
+        body {
+            padding: 40px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+        .extension-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .extension-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .extension-info {
+            flex: 1;
+        }
+        .extension-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+        .extension-desc {
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+        .extension-actions {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        #add-extension-btn {
+            margin-bottom: 30px;
+            padding: 12px 24px;
+            font-size: 15px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #111;
+            padding: 30px;
+            border-radius: 24px;
+            width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        input, textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            outline: none;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>Extensions</h1>
+    <p style="opacity: 0.6; margin-bottom: 30px;">Install and manage your browser extensions (Userscripts).</p>
+    
+    <button id="add-extension-btn" onclick="openModal()">+ Add Extension</button>
+
+    <div id="extensions-list">
+        <!-- Extensions will be loaded here -->
+    </div>
+
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0;">Add Extension</h2>
+            <input type="text" id="ext-name" placeholder="Extension Name">
+            <textarea id="ext-code" placeholder="Paste script code here..." rows="10"></textarea>
+            <div style="display:flex; gap:10px; justify-content: flex-end;">
+                <button class="secondary" onclick="closeModal()">Cancel</button>
+                <button onclick="saveExtension()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const presets = [
+            { name: "Dark Mode", code: "document.body.style.filter = 'invert(1) hue-rotate(180deg)';" },
+            { name: "Ad Blocker (Mock)", code: "console.log('Ad blocker active');" },
+            { name: "Custom Font", code: "document.body.style.fontFamily = 'Comic Sans MS';" }
+        ];
+
+        let extensions = JSON.parse(localStorage.getItem('gravity_extensions'));
+        if (!extensions) {
+            extensions = presets.map(p => ({ ...p, enabled: false }));
+            localStorage.setItem('gravity_extensions', JSON.stringify(extensions));
+        }
+
+        function renderExtensions() {
+            const list = document.getElementById('extensions-list');
+            list.innerHTML = '';
+            
+            if (extensions.length === 0) {
+                list.innerHTML = '<div style="opacity:0.4; text-align:center; padding:40px;">No extensions installed.</div>';
+                return;
+            }
+
+            extensions.forEach((ext, index) => {
+                const card = document.createElement('div');
+                card.className = 'extension-card';
+                card.innerHTML = `
+                    <div class="extension-icon">${ext.name[0].toUpperCase()}</div>
+                    <div class="extension-info">
+                        <div class="extension-name">${ext.name}</div>
+                        <div class="extension-desc">${ext.code.substring(0, 50)}...</div>
+                    </div>
+                    <div class="extension-actions">
+                        <button class="secondary" onclick="deleteExtension(${index})">Remove</button>
+                        <button onclick="toggleExtension(${index})">${ext.enabled ? 'Disable' : 'Enable'}</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function openModal() {
+            document.getElementById('add-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('add-modal').style.display = 'none';
+        }
+
+        function saveExtension() {
+            const name = document.getElementById('ext-name').value;
+            const code = document.getElementById('ext-code').value;
+            
+            if (!name || !code) return;
+
+            extensions.push({ name, code, enabled: true });
+            localStorage.setItem('gravity_extensions', JSON.stringify(extensions));
+            
+            document.getElementById('ext-name').value = '';
+            document.getElementById('ext-code').value = '';
+            closeModal();
+            renderExtensions();
+        }
+
+        function deleteExtension(index) {
+            extensions.splice(index, 1);
+            localStorage.setItem('gravity_extensions', JSON.stringify(extensions));
+            renderExtensions();
+        }
+
+        function toggleExtension(index) {
+            extensions[index].enabled = !extensions[index].enabled;
+            localStorage.setItem('gravity_extensions', JSON.stringify(extensions));
+            renderExtensions();
+        }
+
+        window.addEventListener('message', (event) => {
+            // Extensions page logic
+        });
+
+        renderExtensions();
+    </script>
+</body>
+</html>
