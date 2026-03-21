@@ -347,6 +347,11 @@
             proxyFrame.contentWindow.postMessage({ type: 'loadUrl', url: url }, '*');
         }
 
+        function addBookmarkToProxy(title, url) {
+            const proxyFrame = document.getElementById('proxy-frame');
+            proxyFrame.contentWindow.postMessage({ type: 'addBookmark', title: title, url: url }, '*');
+        }
+
         function maximizeFrame(id) {
             const frame = document.getElementById(id);
             const isMaximized = frame.classList.contains('maximized');
