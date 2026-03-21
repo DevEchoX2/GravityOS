@@ -1,95 +1,12 @@
 let tabs = [];
 let activeTabId = null;
-let scramjetCtrl = null;
-let enginesReady = false;
 
 let gravityConfig = {
-    engine: localStorage.getItem('gravity_engine') || 'uv',
-    transport: localStorage.getItem('gravity_transport') || 'epoxy',
     wisp: localStorage.getItem('gravity_wisp') || 'wss://wisp.rhw.one/'
 };
 
-async function initProxyEngines() {
-    enginesReady = false;
-    scramjetCtrl = null;
-
-    try {
-        if ('serviceWorker' in navigator) {
-            if (gravityConfig.engine === 'uv' && window.__uv$config) {
-                await navigator.serviceWorker.register('/uv/sw.js', { scope: __uv$config.prefix });
-            } else if (gravityConfig.engine === 'scramjet') {
-                await navigator.serviceWorker.register('/ixlmath/sw.js', { scope: '/ixlmath/go/' });
-            }
-            await navigator.serviceWorker.ready;
-        }
-    } catch (e) {
-        console.error("SW Registration failed:", e);
-    }
-
-    if (window.BareMux) {
-        try {
-            const conn = new BareMux.BareMuxConnection("/ixlmath/baremux/worker.js");
-            const transportPath = gravityConfig.transport === 'epoxy' 
-                ? "/ixlmath/epoxy/index.mjs" 
-                : "/ixlmath/libcurl/index.mjs";
-                
-            await conn.setTransport(transportPath, [{ websocket: gravityConfig.wisp }]);
-        } catch (e) {
-            console.error("BareMux init failed:", e);
-        }
-    }
-
-    if (gravityConfig.engine === 'uv') {
-        enginesReady = true;
-        checkPendingLoad();
-    } 
-    else if (gravityConfig.engine === 'scramjet') {
-        const attemptScramjetInit = async (retries = 20) => {
-            if (window.$scramjetLoadController) {
-                try {
-                    const { ScramjetController } = window.$scramjetLoadController();
-                    scramjetCtrl = new ScramjetController({
-                        files: { 
-                            all: "/ixlmath/scram/scramjet.all.js", 
-                            wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
-                            sync: "/ixlmath/scram/scramjet.sync.js" 
-                        },
-                        prefix: "/ixlmath/go/" 
-                    });
-                    
-                    if (typeof scramjetCtrl.init === 'function') {
-                        scramjetCtrl.init();
-                    }
-                    
-                    enginesReady = true;
-                    checkPendingLoad();
-                } catch (e) {
-                    console.error("Scramjet init failed:", e);
-                    enginesReady = true; 
-                }
-            } else if (retries > 0) {
-                setTimeout(() => attemptScramjetInit(retries - 1), 250);
-            } else {
-                console.error("Scramjet script failed to load entirely.");
-                enginesReady = true; 
-                checkPendingLoad();
-            }
-        };
-        attemptScramjetInit();
-    }
-}
-
-function checkPendingLoad() {
-    const titleEl = document.querySelector(`#tab-${activeTabId} .tab-title`);
-    if (titleEl && titleEl.innerText === 'Starting engine...') {
-        launchProxy();
-    }
-}
-
 function openSettings() {
     document.getElementById('browser-menu').style.display = 'none';
-    document.getElementById('setting-engine').value = gravityConfig.engine;
-    document.getElementById('setting-transport').value = gravityConfig.transport;
     document.getElementById('setting-wisp').value = gravityConfig.wisp;
     document.getElementById('settings-modal').style.display = 'block';
 }
@@ -98,22 +15,10 @@ function closeSettings() {
     document.getElementById('settings-modal').style.display = 'none';
 }
 
-async function saveSettings() {
-    gravityConfig.engine = document.getElementById('setting-engine').value;
-    gravityConfig.transport = document.getElementById('setting-transport').value;
+function saveSettings() {
     gravityConfig.wisp = document.getElementById('setting-wisp').value;
-    
-    localStorage.setItem('gravity_engine', gravityConfig.engine);
-    localStorage.setItem('gravity_transport', gravityConfig.transport);
     localStorage.setItem('gravity_wisp', gravityConfig.wisp);
-    
     closeSettings();
-    await initProxyEngines();
-    
-    const url = document.getElementById('url-bar').value;
-    if(url && !url.includes('newtab.html')) {
-        launchProxy();
-    }
 }
 
 function createNewTab(url = 'newtab.html') {
@@ -195,13 +100,8 @@ function launchProxy() {
         const viewport = document.getElementById(`viewport-${activeTabId}`);
         if (viewport) {
             try { viewport.contentWindow.eval(decodeURIComponent(code)); } 
-            catch (e) { console.error(e); }
+            catch (e) {}
         }
-        return;
-    }
-
-    if (!enginesReady) {
-        document.querySelector(`#tab-${activeTabId} .tab-title`).innerText = 'Starting engine...';
         return;
     }
     
@@ -219,15 +119,12 @@ function launchProxy() {
     
     let encodedUrl = targetUrl;
     
-    if (gravityConfig.engine === 'uv' && window.__uv$config) {
-        encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
-    } else if (gravityConfig.engine === 'scramjet') {
-        if (scramjetCtrl && typeof scramjetCtrl.encodeUrl === 'function') {
-            encodedUrl = scramjetCtrl.encodeUrl(targetUrl);
-        } else {
-            alert("Scramjet Engine failed to load properly. Switch to Ultraviolet in Proxy Settings.");
-            return;
-        }
+    if (window.shaderClient && typeof window.shaderClient.encodeUrl === 'function') {
+        encodedUrl = window.shaderClient.encodeUrl(targetUrl);
+    } else if (window.MatrixEngine && typeof window.MatrixEngine.encode === 'function') {
+        encodedUrl = window.MatrixEngine.encode(targetUrl);
+    } else {
+        encodedUrl = "/service/" + encodeURIComponent(targetUrl);
     }
     
     const viewport = document.getElementById(`viewport-${activeTabId}`);
@@ -281,5 +178,4 @@ document.getElementById('url-bar').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') launchProxy();
 });
 
-initProxyEngines();
 createNewTab();
