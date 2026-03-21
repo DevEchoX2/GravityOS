@@ -1,9 +1,67 @@
 let tabs = [];
 let activeTabId = null;
+let bookmarks = JSON.parse(localStorage.getItem('gravity_bookmarks') || '[]');
 
 let gravityConfig = {
     wisp: localStorage.getItem('gravity_wisp') || 'wss://wisp.rhw.one/'
 };
+
+function renderBookmarks() {
+    const bar = document.getElementById('bookmarks-bar');
+    if (!bar) return;
+    bar.innerHTML = '';
+    bookmarks.forEach((bm, index) => {
+        const item = document.createElement('div');
+        item.className = 'bookmark-item';
+        item.innerHTML = `
+            <span>${bm.title}</span>
+            <span class="remove-bookmark" onclick="removeBookmark(event, ${index})">×</span>
+        `;
+        item.onclick = () => {
+            document.getElementById('url-bar').value = bm.url;
+            launchProxy();
+        };
+        bar.appendChild(item);
+    });
+}
+
+function toggleBookmark() {
+    const url = document.getElementById('url-bar').value;
+    if (!url) return;
+    
+    const index = bookmarks.findIndex(bm => bm.url === url);
+    if (index > -1) {
+        bookmarks.splice(index, 1);
+    } else {
+        const title = document.querySelector(`#tab-${activeTabId} .tab-title`).innerText || 'New Bookmark';
+        bookmarks.push({ title, url });
+    }
+    
+    saveBookmarks();
+}
+
+function removeBookmark(e, index) {
+    e.stopPropagation();
+    bookmarks.splice(index, 1);
+    saveBookmarks();
+}
+
+function saveBookmarks() {
+    localStorage.setItem('gravity_bookmarks', JSON.stringify(bookmarks));
+    renderBookmarks();
+    updateBookmarkStar();
+}
+
+function updateBookmarkStar() {
+    const url = document.getElementById('url-bar').value;
+    const star = document.getElementById('bookmark-star');
+    if (!star) return;
+    if (bookmarks.some(bm => bm.url === url)) {
+        star.classList.add('active');
+    } else {
+        star.classList.remove('active');
+    }
+}
 
 function openSettings() {
     document.getElementById('browser-menu').style.display = 'none';
@@ -65,6 +123,7 @@ function switchTab(id) {
         activeViewport.style.display = 'block';
         const url = activeViewport.src;
         document.getElementById('url-bar').value = (url.includes('newtab.html') || url === 'about:blank') ? '' : url;
+        updateBookmarkStar();
     }
 }
 
@@ -131,6 +190,7 @@ function launchProxy() {
     if (viewport) {
         viewport.src = encodedUrl;
         document.querySelector(`#tab-${activeTabId} .tab-title`).innerText = 'Loading...';
+        updateBookmarkStar();
     }
 }
 
@@ -171,6 +231,12 @@ window.addEventListener('message', (event) => {
     if (event.data.type === 'loadUrl') {
         document.getElementById('url-bar').value = event.data.url;
         launchProxy();
+    } else if (event.data.type === 'addBookmark') {
+        const { title, url } = event.data;
+        if (!bookmarks.some(bm => bm.url === url)) {
+            bookmarks.push({ title, url });
+            saveBookmarks();
+        }
     }
 });
 
@@ -179,3 +245,4 @@ document.getElementById('url-bar').addEventListener('keypress', (e) => {
 });
 
 createNewTab();
+renderBookmarks();
