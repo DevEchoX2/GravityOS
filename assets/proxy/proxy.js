@@ -1,6 +1,7 @@
 let tabs = [];
 let activeTabId = null;
 let scramjetCtrl = null;
+let enginesReady = false;
 
 let gravityConfig = {
     engine: localStorage.getItem('gravity_engine') || 'uv',
@@ -9,6 +10,9 @@ let gravityConfig = {
 };
 
 async function initProxyEngines() {
+    enginesReady = false;
+    scramjetCtrl = null;
+
     if (window.BareMux) {
         try {
             const conn = new BareMux.BareMuxConnection("/ixlmath/baremux/worker.js");
@@ -17,28 +21,61 @@ async function initProxyEngines() {
                 : "/ixlmath/libcurl/index.mjs";
                 
             await conn.setTransport(transportPath, [{ websocket: gravityConfig.wisp }]);
-            console.log(`BareMux initialized with ${gravityConfig.transport}`);
         } catch (e) {
             console.error("BareMux init failed:", e);
         }
     }
 
-    if (gravityConfig.engine === 'scramjet' && window.$scramjetLoadController) {
+    if (gravityConfig.engine === 'uv') {
         try {
-            const { ScramjetController } = window.$scramjetLoadController();
-            scramjetCtrl = new ScramjetController({
-                files: { 
-                    all: "/ixlmath/scram/scramjet.all.js", 
-                    wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
-                    sync: "/ixlmath/scram/scramjet.sync.js" 
-                },
-                prefix: "/ixlmath/go/" 
-            });
-            scramjetCtrl.init();
-            console.log("Scramjet initialized");
+            if ('serviceWorker' in navigator) {
+                await navigator.serviceWorker.register('/uv/sw.js', {
+                    scope: __uv$config.prefix
+                });
+            }
+            enginesReady = true;
         } catch (e) {
-            console.error("Scramjet init failed:", e);
+            console.error("UV SW registration failed:", e);
+            enginesReady = true; 
         }
+    } 
+    else if (gravityConfig.engine === 'scramjet') {
+        const attemptScramjetInit = async (retries = 10) => {
+            if (window.$scramjetLoadController) {
+                try {
+                    const { ScramjetController } = window.$scramjetLoadController();
+                    scramjetCtrl = new ScramjetController({
+                        files: { 
+                            all: "/ixlmath/scram/scramjet.all.js", 
+                            wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
+                            sync: "/ixlmath/scram/scramjet.sync.js" 
+                        },
+                        prefix: "/ixlmath/go/" 
+                    });
+                    
+                    if (typeof scramjetCtrl.init === 'function') {
+                        await scramjetCtrl.init();
+                    }
+                    
+                    if ('serviceWorker' in navigator) {
+                        await navigator.serviceWorker.register('/ixlmath/scram/sw.js', {
+                            scope: "/ixlmath/go/"
+                        });
+                    }
+                    
+                    enginesReady = true;
+                } catch (e) {
+                    console.error("Scramjet init failed:", e);
+                    enginesReady = true; 
+                }
+            } else if (retries > 0) {
+                setTimeout(() => attemptScramjetInit(retries - 1), 500);
+            } else {
+                console.error("Scramjet script failed to load entirely.");
+                enginesReady = true; 
+            }
+        };
+        attemptScramjetInit();
     }
 }
 
@@ -54,7 +91,7 @@ function closeSettings() {
     document.getElementById('settings-modal').style.display = 'none';
 }
 
-function saveSettings() {
+async function saveSettings() {
     gravityConfig.engine = document.getElementById('setting-engine').value;
     gravityConfig.transport = document.getElementById('setting-transport').value;
     gravityConfig.wisp = document.getElementById('setting-wisp').value;
@@ -64,7 +101,7 @@ function saveSettings() {
     localStorage.setItem('gravity_wisp', gravityConfig.wisp);
     
     closeSettings();
-    initProxyEngines();
+    await initProxyEngines();
     
     const url = document.getElementById('url-bar').value;
     if(url && !url.includes('newtab.html')) {
@@ -74,11 +111,7 @@ function saveSettings() {
 
 function createNewTab(url = 'newtab.html') {
     const id = Date.now().toString();
-    const tab = {
-        id: id,
-        url: url,
-        title: 'New Tab'
-    };
+    const tab = { id: id, url: url, title: 'New Tab' };
     tabs.push(tab);
     
     const tabEl = document.createElement('div');
@@ -104,13 +137,11 @@ function createNewTab(url = 'newtab.html') {
     };
     
     document.getElementById('viewports-container').appendChild(viewport);
-    
     switchTab(id);
 }
 
 function switchTab(id) {
     activeTabId = id;
-    
     document.querySelectorAll('.browser-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('iframe').forEach(v => v.style.display = 'none');
     
@@ -156,15 +187,18 @@ function launchProxy() {
         const code = url.slice(11);
         const viewport = document.getElementById(`viewport-${activeTabId}`);
         if (viewport) {
-            try {
-                viewport.contentWindow.eval(decodeURIComponent(code));
-            } catch (e) {
-                console.error(e);
-            }
+            try { viewport.contentWindow.eval(decodeURIComponent(code)); } 
+            catch (e) { console.error(e); }
         }
         return;
     }
     
+    if (!enginesReady) {
+        document.querySelector(`#tab-${activeTabId} .tab-title`).innerText = 'Starting engine...';
+        setTimeout(launchProxy, 500);
+        return;
+    }
+
     let targetUrl = url;
     if (!url.startsWith('http')) {
         const engine = document.getElementById('search-engine').value;
@@ -184,7 +218,7 @@ function launchProxy() {
     } else if (gravityConfig.engine === 'scramjet' && scramjetCtrl) {
         encodedUrl = scramjetCtrl.encodeUrl(targetUrl);
     } else if (gravityConfig.engine === 'scramjet' && !scramjetCtrl) {
-        alert("Scramjet is still initializing, please try again in a second.");
+        alert("Engine failed to load properly. Please check settings or reload.");
         return;
     }
     
