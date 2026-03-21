@@ -111,12 +111,18 @@
         <h2>System</h2>
         <div class="setting-item">
             <div>
-                <div style="font-weight:600;">Favicon Cloaking</div>
-                <div style="font-size:0.8rem; opacity:0.6;">Disguise the tab as Google Drive</div>
+                <div style="font-weight:600;">Tab Cloaking</div>
+                <div style="font-size:0.8rem; opacity:0.6;">Disguise the tab as a different site</div>
             </div>
             <select id="cloak-select" onchange="toggleCloak()">
                 <option value="none">None</option>
                 <option value="drive">Google Drive</option>
+                <option value="google">Google Search</option>
+                <option value="classroom">Google Classroom</option>
+                <option value="canvas">Canvas</option>
+                <option value="gmail">Gmail</option>
+                <option value="about:blank">about:blank</option>
+                <option value="blob">Blob URL</option>
             </select>
         </div>
         <div class="setting-item">
