@@ -1,6 +1,7 @@
 let tabs = [];
 let activeTabId = null;
 let scramjetCtrl = null;
+let enginesReady = false;
 
 let gravityConfig = {
     engine: localStorage.getItem('gravity_engine') || 'uv',
@@ -9,7 +10,21 @@ let gravityConfig = {
 };
 
 async function initProxyEngines() {
+    enginesReady = false;
     scramjetCtrl = null;
+
+    try {
+        if ('serviceWorker' in navigator) {
+            if (gravityConfig.engine === 'uv' && window.__uv$config) {
+                await navigator.serviceWorker.register('/uv/sw.js', { scope: __uv$config.prefix });
+            } else if (gravityConfig.engine === 'scramjet') {
+                await navigator.serviceWorker.register('/ixlmath/sw.js', { scope: '/ixlmath/go/' });
+            }
+            await navigator.serviceWorker.ready;
+        }
+    } catch (e) {
+        console.error("SW Registration failed:", e);
+    }
 
     if (window.BareMux) {
         try {
@@ -25,41 +40,49 @@ async function initProxyEngines() {
     }
 
     if (gravityConfig.engine === 'uv') {
-        try {
-            if ('serviceWorker' in navigator) {
-                await navigator.serviceWorker.register('/uv/sw.js', {
-                    scope: __uv$config.prefix
-                });
-            }
-        } catch (e) {
-            console.error("UV SW registration failed:", e);
-        }
+        enginesReady = true;
+        checkPendingLoad();
     } 
     else if (gravityConfig.engine === 'scramjet') {
-        try {
-            if ('serviceWorker' in navigator) {
-                await navigator.serviceWorker.register('/ixlmath/scram/sw.js', {
-                    scope: "/ixlmath/go/"
-                });
-            }
-
+        const attemptScramjetInit = async (retries = 20) => {
             if (window.$scramjetLoadController) {
-                const { ScramjetController } = window.$scramjetLoadController();
-                scramjetCtrl = new ScramjetController({
-                    files: { 
-                        all: "/ixlmath/scram/scramjet.all.js", 
-                        wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
-                        sync: "/ixlmath/scram/scramjet.sync.js" 
-                    },
-                    prefix: "/ixlmath/go/" 
-                });
-                if (typeof scramjetCtrl.init === 'function') {
-                    scramjetCtrl.init();
+                try {
+                    const { ScramjetController } = window.$scramjetLoadController();
+                    scramjetCtrl = new ScramjetController({
+                        files: { 
+                            all: "/ixlmath/scram/scramjet.all.js", 
+                            wasm: "/ixlmath/scram/scramjet.wasm.wasm", 
+                            sync: "/ixlmath/scram/scramjet.sync.js" 
+                        },
+                        prefix: "/ixlmath/go/" 
+                    });
+                    
+                    if (typeof scramjetCtrl.init === 'function') {
+                        scramjetCtrl.init();
+                    }
+                    
+                    enginesReady = true;
+                    checkPendingLoad();
+                } catch (e) {
+                    console.error("Scramjet init failed:", e);
+                    enginesReady = true; 
                 }
+            } else if (retries > 0) {
+                setTimeout(() => attemptScramjetInit(retries - 1), 250);
+            } else {
+                console.error("Scramjet script failed to load entirely.");
+                enginesReady = true; 
+                checkPendingLoad();
             }
-        } catch (e) {
-            console.error("Scramjet init failed:", e);
-        }
+        };
+        attemptScramjetInit();
+    }
+}
+
+function checkPendingLoad() {
+    const titleEl = document.querySelector(`#tab-${activeTabId} .tab-title`);
+    if (titleEl && titleEl.innerText === 'Starting engine...') {
+        launchProxy();
     }
 }
 
@@ -163,16 +186,6 @@ function updateTabTitle(id, iframe) {
     } catch (e) {}
 }
 
-function encodeScramjetUrl(url) {
-    if (scramjetCtrl && typeof scramjetCtrl.encodeUrl === 'function') {
-        return scramjetCtrl.encodeUrl(url);
-    }
-    if (window.$scramjet && typeof window.$scramjet.encodeUrl === 'function') {
-        return window.$scramjet.encodeUrl(url);
-    }
-    return "/ixlmath/go/" + btoa(url); 
-}
-
 function launchProxy() {
     const url = document.getElementById('url-bar').value;
     if (!url) return;
@@ -184,6 +197,11 @@ function launchProxy() {
             try { viewport.contentWindow.eval(decodeURIComponent(code)); } 
             catch (e) { console.error(e); }
         }
+        return;
+    }
+
+    if (!enginesReady) {
+        document.querySelector(`#tab-${activeTabId} .tab-title`).innerText = 'Starting engine...';
         return;
     }
     
@@ -204,7 +222,12 @@ function launchProxy() {
     if (gravityConfig.engine === 'uv' && window.__uv$config) {
         encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
     } else if (gravityConfig.engine === 'scramjet') {
-        encodedUrl = encodeScramjetUrl(targetUrl);
+        if (scramjetCtrl && typeof scramjetCtrl.encodeUrl === 'function') {
+            encodedUrl = scramjetCtrl.encodeUrl(targetUrl);
+        } else {
+            alert("Scramjet Engine failed to load properly. Switch to Ultraviolet in Proxy Settings.");
+            return;
+        }
     }
     
     const viewport = document.getElementById(`viewport-${activeTabId}`);
