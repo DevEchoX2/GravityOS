@@ -35,6 +35,7 @@
                 </optgroup>
             </select>
             <button onclick="execute()">Run Code</button>
+            <button class="secondary" onclick="addToBrowser()">Add to Browser</button>
             <button class="secondary" onclick="createBookmarklet()">Bookmarklet</button>
             <button class="secondary" onclick="copyCode()">Copy Code</button>
             <button class="secondary" onclick="document.getElementById('file-input').click()">Upload File</button>
@@ -82,6 +83,22 @@
             bmLink.href = `javascript:(function(){${encoded}})();`;
             document.getElementById('bookmarklet-tip').style.display = 'block';
             document.getElementById('status').innerText = "Bookmarklet updated! Drag the link to your bookmarks bar.";
+        };
+
+        window.addToBrowser = function() {
+            const code = document.getElementById('code-area').value;
+            const hubSelect = document.getElementById('hub-select');
+            let title = 'New Script';
+            if (hubSelect.value) {
+                title = hubSelect.value.split(':')[1];
+            }
+            const url = `javascript:(function(){${encodeURIComponent(code)}})();`;
+            if (window.parent && window.parent.addBookmarkToProxy) {
+                window.parent.addBookmarkToProxy(title, url);
+                document.getElementById('status').innerText = `Added "${title}" to Browser bookmarks!`;
+            } else {
+                document.getElementById('status').innerText = "Error: Could not find Browser bookmarks.";
+            }
         };
 
         window.copyCode = function() {
