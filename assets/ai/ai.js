@@ -6,7 +6,7 @@
             deobfuscate('Z3NrX214STlDZEs0WmV1b2VHbXZrS0hyV0dyeWIzRlloQWNBbnJUTk5DNEhxUnUyNFdjMnFXMHc=')
         ],
         geminiKeys: [
-            deobfuscate('QUl6YVN5Q01fWjZfWjZfWjZfWjZfWjZfWjZfWjZfWjZfWjZfWg==') // Placeholder - replace with your actual Gemini key
+            deobfuscate('QUl6YVN5QjRPSmNkY0dzTkF2ZlJ2VjNMdmJTTHpaQThXOGU5YW1r')
         ],
         models: ['grok-beta', 'grok-2-1212', 'grok-2-vision-1212', 'gemini-1.5-flash', 'gemini-1.5-pro'],
         currentKeyIndex: 0,
@@ -48,8 +48,8 @@
     async function callGemini(prompt) {
         try {
             const apiKey = CONFIG.geminiKeys[CONFIG.currentGeminiKeyIndex];
-            if (!apiKey || apiKey.includes('_Z6_')) {
-                addMessage("No valid Gemini API key found. Please update ai.js with your key.", false);
+            if (!apiKey) {
+                addMessage("No Gemini API key found.", false);
                 return;
             }
 
@@ -89,6 +89,14 @@
 
             if (!response.ok) {
                 const errorData = await response.json();
+                // Key rotation for Gemini
+                if (response.status === 401 || response.status === 429) {
+                    if (CONFIG.geminiKeys.length > 1) {
+                        CONFIG.currentGeminiKeyIndex = (CONFIG.currentGeminiKeyIndex + 1) % CONFIG.geminiKeys.length;
+                        console.warn('Switching to next Gemini API key due to error');
+                        return callGemini(prompt);
+                    }
+                }
                 throw new Error(errorData.error?.message || 'Gemini API error');
             }
 
@@ -111,7 +119,7 @@
         try {
             const apiKey = CONFIG.keys[CONFIG.currentKeyIndex];
             if (!apiKey) {
-                addMessage("No API key found.", false);
+                addMessage("No Grok API key found.", false);
                 return;
             }
 
@@ -146,10 +154,11 @@
 
             if (!response.ok) {
                 const errorData = await response.json();
+                // Key rotation for Grok
                 if (response.status === 401 || response.status === 429) {
                     if (CONFIG.keys.length > 1) {
                         CONFIG.currentKeyIndex = (CONFIG.currentKeyIndex + 1) % CONFIG.keys.length;
-                        console.warn('Switching to next API key due to error');
+                        console.warn('Switching to next Grok API key due to error');
                         return callAI(prompt);
                     }
                 }
