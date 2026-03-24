@@ -6,9 +6,10 @@
             deobfuscate('Z3NrX214STlDZEs0WmV1b2VHbXZrS0hyV0dyeWIzRlloQWNBbnJUTk5DNEhxUnUyNFdjMnFXMHc=')
         ],
         geminiKeys: [
-            deobfuscate('QUl6YVN5QjRPSmNkY0dzTkF2ZlJ2VjNMdmJTTHpaQThXOGU5YW1r')
+            deobfuscate('QUl6YVN5RHlYelFyVGpKSXRCdnpONXJ3Z0pJTjdRQzFYR095UC00'),
+            deobfuscate('QUl6YVN5Q1Z3UkJxOU1QMDIvSGlCOTB1b05Wai1WVEkxcll3UnpuSQ==')
         ],
-        models: ['grok-beta', 'grok-2-1212', 'grok-2-vision-1212', 'gemini-1.5-flash', 'gemini-1.5-pro'],
+        models: ['grok-beta', 'gemini-1.5-flash'],
         currentKeyIndex: 0,
         currentGeminiKeyIndex: 0,
         currentModel: 'grok-beta'
