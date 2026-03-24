@@ -105,13 +105,20 @@
         <div class="message ai-message">Hello! I'm your gravityOS assistant. How can I help you today?</div>
     </div>
     <div class="typing" id="typing-indicator">AI is thinking...</div>
+    
     <div id="input-container">
+        <select id="model-select" style="background: transparent; border: none; color: white; outline: none; font-size: 12px; cursor: pointer; margin-left: 10px;">
+            <option value="grok-beta">Grok Beta</option>
+            <option value="grok-2-1212">Grok 2</option>
+            <option value="grok-2-vision-1212">Grok 2 Vision</option>
+        </select>
         <input type="text" id="ai-input" placeholder="Ask me anything...">
         <button id="send-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
     </div>
 
+    <script src="ai.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('gravity_theme');
@@ -135,36 +142,6 @@
                 }
             }
         });
-
-        const input = document.getElementById('ai-input');
-        const btn = document.getElementById('send-btn');
-        const container = document.getElementById('chat-container');
-        const typing = document.getElementById('typing-indicator');
-
-        function addMessage(text, isUser) {
-            const msg = document.createElement('div');
-            msg.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-            msg.innerText = text;
-            container.appendChild(msg);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        btn.onclick = () => {
-            const text = input.value;
-            if (!text) return;
-            addMessage(text, true);
-            input.value = '';
-            
-            typing.style.display = 'block';
-            setTimeout(() => {
-                typing.style.display = 'none';
-                addMessage("I'm your gravityOS companion. I can help you navigate the system, suggest games, or explain how the proxy works!", false);
-            }, 1500);
-        };
-
-        input.onkeypress = (e) => {
-            if (e.key === 'Enter') btn.onclick();
-        };
     </script>
 </body>
 </html>
