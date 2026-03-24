@@ -5,8 +5,12 @@
         keys: [
             deobfuscate('Z3NrX214STlDZEs0WmV1b2VHbXZrS0hyV0dyeWIzRlloQWNBbnJUTk5DNEhxUnUyNFdjMnFXMHc=')
         ],
-        models: ['grok-beta', 'grok-2-1212', 'grok-2-vision-1212'],
+        geminiKeys: [
+            deobfuscate('QUl6YVN5Q01fWjZfWjZfWjZfWjZfWjZfWjZfWjZfWjZfWjZfWg==') // Placeholder - replace with your actual Gemini key
+        ],
+        models: ['grok-beta', 'grok-2-1212', 'grok-2-vision-1212', 'gemini-1.5-flash', 'gemini-1.5-pro'],
         currentKeyIndex: 0,
+        currentGeminiKeyIndex: 0,
         currentModel: 'grok-beta'
     };
 
@@ -15,6 +19,11 @@
     const container = document.getElementById('chat-container');
     const typing = document.getElementById('typing-indicator');
     const modelSelect = document.getElementById('model-select');
+    const screenShareBtn = document.getElementById('screen-share-btn');
+
+    let screenStream = null;
+    let videoElement = document.createElement('video');
+    let canvasElement = document.createElement('canvas');
 
     function addMessage(text, isUser) {
         const msg = document.createElement('div');
@@ -25,12 +34,101 @@
         return msg;
     }
 
+    async function getScreenFrame() {
+        if (!screenStream) return null;
+        
+        const context = canvasElement.getContext('2d');
+        canvasElement.width = videoElement.videoWidth;
+        canvasElement.height = videoElement.videoHeight;
+        context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+        
+        return canvasElement.toDataURL('image/jpeg', 0.8).split(',')[1];
+    }
+
+    async function callGemini(prompt) {
+        try {
+            const apiKey = CONFIG.geminiKeys[CONFIG.currentGeminiKeyIndex];
+            if (!apiKey || apiKey.includes('_Z6_')) {
+                addMessage("No valid Gemini API key found. Please update ai.js with your key.", false);
+                return;
+            }
+
+            const frame = await getScreenFrame();
+            const contents = [
+                {
+                    parts: [
+                        { text: prompt }
+                    ]
+                }
+            ];
+
+            if (frame) {
+                contents[0].parts.push({
+                    inlineData: {
+                        mimeType: "image/jpeg",
+                        data: frame
+                    }
+                });
+            }
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.currentModel}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: contents,
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 2048,
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Gemini API error');
+            }
+
+            const data = await response.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response from Gemini.";
+            addMessage(text, false);
+        } catch (error) {
+            console.error('Gemini Error:', error);
+            addMessage(`Error: ${error.message}`, false);
+        } finally {
+            typing.style.display = 'none';
+        }
+    }
+
     async function callAI(prompt) {
+        if (CONFIG.currentModel.startsWith('gemini')) {
+            return callGemini(prompt);
+        }
+
         try {
             const apiKey = CONFIG.keys[CONFIG.currentKeyIndex];
             if (!apiKey) {
                 addMessage("No API key found.", false);
                 return;
+            }
+
+            const messages = [
+                { role: 'system', content: 'You are a helpful assistant for gravityOS, a futuristic operating system simulation.' },
+                { role: 'user', content: prompt }
+            ];
+
+            // If vision is needed and model is vision-capable
+            if (CONFIG.currentModel.includes('vision')) {
+                const frame = await getScreenFrame();
+                if (frame) {
+                    messages[1].content = [
+                        { type: 'text', text: prompt },
+                        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${frame}` } }
+                    ];
+                }
             }
 
             const response = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -41,10 +139,7 @@
                 },
                 body: JSON.stringify({
                     model: CONFIG.currentModel,
-                    messages: [
-                        { role: 'system', content: 'You are a helpful assistant for gravityOS, a futuristic operating system simulation.' },
-                        { role: 'user', content: prompt }
-                    ],
+                    messages: messages,
                     stream: true
                 })
             });
@@ -114,6 +209,40 @@
     if (modelSelect) {
         modelSelect.onchange = (e) => {
             CONFIG.currentModel = e.target.value;
+        };
+    }
+
+    if (screenShareBtn) {
+        screenShareBtn.onclick = async () => {
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+                screenStream = null;
+                screenShareBtn.style.opacity = '0.5';
+                screenShareBtn.style.color = 'white';
+                return;
+            }
+
+            try {
+                screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: false
+                });
+                
+                videoElement.srcObject = screenStream;
+                videoElement.play();
+                
+                screenShareBtn.style.opacity = '1';
+                screenShareBtn.style.color = '#3b82f6';
+                
+                screenStream.getVideoTracks()[0].onended = () => {
+                    screenStream = null;
+                    screenShareBtn.style.opacity = '0.5';
+                    screenShareBtn.style.color = 'white';
+                };
+            } catch (err) {
+                console.error("Error sharing screen:", err);
+                alert("Failed to share screen: " + err.message);
+            }
         };
     }
 
